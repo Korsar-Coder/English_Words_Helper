@@ -8,18 +8,26 @@ import streamlit as st
 # path = "https://api.dictionaryapi.dev/api/v2/entries/en/<word>"
 
 translator = googletrans.Translator()
+state = st.session_state
 
 class Word_Info:
-    translation: str
+    origin: str
+    
     grade: int
 
     def __init__(self, grade = 5, **kwargs):
         self.grade = grade
         for key, value in kwargs.items():
             setattr(self, key, value)
+    
+    async def write_translation(self):
+        self.translation = await translator.translate(self.origin,"ru", "en")
 
-if "words" not in st.session_state:
-    st.session_state.words = {}
+if "words" not in state and "set_words" not in state:
+    state.words = []
+    state.set_words = set()
+
+if "tasks" not in state: state.tasks = []
 
 # async def add_word(word: str):
 #     global words
@@ -37,15 +45,27 @@ if "words" not in st.session_state:
 #             if index == fun_index:
 #                 print("") 
 
-# async def main():
-def main():
-    state = st.session_state
+async def main():
     container = st.container()
     new_word = container.text_input("Слово/Выражение для запоминания")
     add_button = container.button("Добавить")
+    check_button = container.button("Посмотреть перевод")
     if add_button:
-        state.words[new_word] = Word_Info()
+        if not new_word in state.set_words:
+            state.words.append(Word_Info(grade=5,origin = new_word))
+            state.tasks.append(state.words[len(state.words) - 1].write_translation())
+            state.set_words.add(new_word)
     st.write(state.words)
+    if check_button:
+        await asyncio.gather(*state.tasks)
+        state.tasks = []
+        pairs = {}
+        for word in state.words:
+            if hasattr(word, 'translation'):
+                pairs[word.origin] = word.translation.text
+            else: pairs[word.origin] = "Переводится..."  
+        st.write(pairs)          
+
     # tasks = []
     # while True:
     #     answer = input("Слово для запоминания: ").strip()
@@ -77,5 +97,4 @@ def main():
     #         fake_words = other_words
 
 if __name__ == "__main__":
-    # asyncio.run(main())
-    main()
+    asyncio.run(main())
