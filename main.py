@@ -3,8 +3,6 @@ import asyncio
 import googletrans
 from time import sleep
 import random as rand
-import streamlit as st
-
 # path = "https://api.dictionaryapi.dev/api/v2/entries/en/<word>"
 
 translator = googletrans.Translator()
@@ -14,7 +12,6 @@ class Word_Info:
     origin: str
     
     grade: int
-
     def __init__(self, grade = 5, **kwargs):
         self.grade = grade
         for key, value in kwargs.items():
@@ -22,7 +19,7 @@ class Word_Info:
     
     async def write_translation(self):
         self.translation = await translator.translate(self.origin,"ru", "en")
-
+        
 if "words" not in state and "set_words" not in state:
     state.words = []
     state.set_words = set()

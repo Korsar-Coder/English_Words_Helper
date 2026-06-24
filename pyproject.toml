@@ -3,19 +3,19 @@ name = "english-words-helper"
 version = "0.1.0"
 description = ""
 authors = [
-    {name = "Andruha Dreamer",email = "andreyakusok@mail.ru"}
+    {name = "Andrey",email = "andreyakusok@mail.ru"}
 ]
 readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [
-    "requests (>=2.33.1,<3.0.0)",
-    "translate (>=3.8.0,<4.0.0)",
-    "googletrans (>=4.0.2,<5.0.0)",
-    "streamlit (>=1.56.0,<2.0.0)",
-    "fastapi (>=0.136.0,<0.137.0)",
-    "uvicorn (>=0.44.0,<0.45.0)",
-    "sqlalchemy (>=2.0.49,<3.0.0)",
-    "psycopg2 (>=2.9.12,<3.0.0)"
+    "fastapi[standart] (>=0.137.1,<0.138.0)",
+    "sqlalchemy (>=2.0.51,<3.0.0)",
+    "uvicorn (>=0.49.0,<0.50.0)",
+    "psycopg2 (>=2.9.12,<3.0.0)",
+    "authx (>=1.7.0,<2.0.0)",
+    "asyncpg (>=0.31.0,<0.32.0)",
+    "pwdlib[argon2] (>=0.3.0,<0.4.0)",
+    "alembic (>=1.18.4,<2.0.0)"
 ]
 
 

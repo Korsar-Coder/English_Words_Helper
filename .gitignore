@@ -1,5 +1,2 @@
 /config.json
-.vscode/
-.venv/
-/poetry.lock
-/pyproject.toml
+/alembic.ini
