@@ -1,7 +1,7 @@
 import uvicorn
 from fastapi import FastAPI, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+from sqlalchemy import select, text
 from database import engine, Base, get_session
 from typing import Annotated
 import models 
@@ -40,9 +40,15 @@ async def add_user(data: UserSchema, session: SessionDep):
 
 @app.get("/get_user{name}")
 async def get_user(data: str, session: SessionDep):
-    query = select(models.User).where(models.User.name == data)
+    query = select(models.User.name, models.User.id,
+                   models.User.hashed_password).where(models.User.name == data)
     result = await session.execute(query)
-    return result.scalars().all()
+    return result.mappings().all()
 
+# @app.post("/drop_users")
+# async def drop_users():
+#     async with engine.begin () as conn:
+#         await conn.execute(text("TRUNCATE TABLE users RESTART IDENTITY CASCADE;"))
+        
 if __name__ == "__main__":
     uvicorn.run("main:app", reload=True)

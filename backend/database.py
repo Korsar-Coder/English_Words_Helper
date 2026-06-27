@@ -8,7 +8,7 @@ with open("config.json", "r") as file:
 class Base(DeclarativeBase):
     pass
 
-base_url = f"postgresql+asyncpg://postgres:{config['password']}@localhost/{config['database']}"
+base_url = f"postgresql+asyncpg://{config['user']}:{config['password']}@localhost/{config['database']}"
 
 engine = create_async_engine(base_url)
 async_session = async_sessionmaker(bind=engine, expire_on_commit=False)
