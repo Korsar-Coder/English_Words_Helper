@@ -1,14 +1,14 @@
 from sqlalchemy import ForeignKey, UniqueConstraint, CheckConstraint
 from sqlalchemy.orm import Mapped, mapped_column
-from database import Base
+from database import Base, config
 
 class User(Base):
     __tablename__ = "users"
     id: Mapped[int] = mapped_column(primary_key=True)
-    name: Mapped[str]
+    name: Mapped[str] = mapped_column(unique=True)
     hashed_password: Mapped[str] = mapped_column()
     __table_args__ = (
-        CheckConstraint("TRIM(username) <> ''", name="username_not_empty"),
+        CheckConstraint("TRIM(name) <> ''", name="username_not_empty"),
     )
     
 class Word_Info(Base):
