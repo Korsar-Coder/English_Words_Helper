@@ -1,1 +1,0 @@
-drop TABLE users, users_words, words_info
