@@ -7,13 +7,14 @@ config = context.config
 PROJECT_ROOT = os.path.abspath(
     os.path.dirname(context.config.config_file_name)
 )
-sys.path.append(os.path.join(PROJECT_ROOT, "backend"))
+print("-" * 10 + "\n" + PROJECT_ROOT, flush=True)
+sys.path.append(PROJECT_ROOT)
 from logging.config import fileConfig
 # import json
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 from database import Base
-from models import User, Word_Info, Users_word
+from models import *
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

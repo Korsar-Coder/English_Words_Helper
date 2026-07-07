@@ -5,19 +5,33 @@ from sqlalchemy import select, text, insert
 from database import engine, Base, get_session
 from typing import Annotated
 import models 
-from models import config
+from models import main_config
 from pydantic import BaseModel, Field 
 from security import get_password_hash, verify_password
 from authx import AuthX, AuthXConfig
-import json
 import googletrans
 
+from fastapi.middleware.cors import CORSMiddleware
+
 app = FastAPI()
+
+origins = [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],     
+    allow_headers=["*"],     
+    )
 
 translator = googletrans.Translator()
 
 auth_config = AuthXConfig()
-auth_config.JWT_SECRET_KEY = config["JWT_KEY"]
+auth_config.JWT_SECRET_KEY = main_config["JWT_KEY"]
 auth_config.JWT_ACCESS_COOKIE_NAME = "english_access_token"
 auth_config.JWT_TOKEN_LOCATION = ["cookies"]
 
@@ -37,9 +51,11 @@ class UserDBSchema(BaseModel):
         return cls(name= name, hashed_password = get_password_hash(raw_password))
    
 class WordFrontendSchema(BaseModel):
+    user_id: int
     origin: str = Field(min_length=2, max_length=20)
+    translation: str = ""
     is_origin_english: bool = True
-
+    
 class WordDBSchema(BaseModel):
     english_word: str
     russian_word: str 
@@ -83,9 +99,16 @@ async def login(creds: UserFrontendSchema, response: Response, session: SessionD
 @app.post("/add_word")
 async def add_word(data: WordFrontendSchema, session: SessionDep):
     data.origin = data.origin.lower()
-    data_to_db = await WordDBSchema.translate_word(data.origin, data.is_origin_english)
-    query = insert(models.Word_Info).values(origin= data_to_db.english_word,
-                                            translation= data_to_db.russian_word)
+    if data.translation == "":
+        data_to_db = await WordDBSchema.translate_word(data.origin, data.is_origin_english)
+    else: 
+        if data.is_origin_english:
+            data_to_db = WordDBSchema(english_word=data.origin, russian_word=data.translation)
+        else: 
+            data_to_db = WordDBSchema(english_word=data.translation, russian_word=data.origin)
+    query = insert(models.Users_word).values(origin= data_to_db.english_word,
+                                            translation= data_to_db.russian_word,
+                                            user_id= data.user_id)
     result = await session.execute(query)
     await session.commit()
     return {"result": result}
@@ -126,16 +149,17 @@ async def get_users(session: SessionDep):
     result = await execute_query(query, session)    
     return result
 
-@app.get("/get_words")
-async def get_words(session: SessionDep):
-    query = select(models.Word_Info)
+@app.get("/get_user_words/{id}")
+async def get_words(id: int, session: SessionDep):
+    query = select(models.Users_word).where(models.Users_word.user_id == id)
     result = await execute_query(query, session)
     return result
 
-@app.post("/drop")
-async def drop():
-    async with engine.begin () as conn:
-        await conn.execute(text("TRUNCATE TABLE words_info RESTART IDENTITY CASCADE;"))
+# @app.post("/drop")
+# async def drop():
+#     async with engine.begin () as conn:
+#         await conn.execute(text("DROP TABLE users_words CASCADE"))
+#         await conn.execute(text("DROP TABLE users CASCADE"))
         
 if __name__ == "__main__":
     uvicorn.run("main:app", reload=True)
