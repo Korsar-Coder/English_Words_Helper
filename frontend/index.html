@@ -2,13 +2,52 @@
 <html lang="ru">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <!-- Меняем название вкладки здесь -->
     <title>English Helper</title>
+    <link rel="stylesheet" href="src/style.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap"
+      rel="stylesheet"
+    />
   </head>
-  <body>
-    <div id="app"></div>
-    <script type="module" src="/src/main.js"></script>
+  <body class="bg-light">
+    <!-- <img
+      src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTOei92SMbItA65QCFPcD2u4CH63Yvf9d4PZGiGnEU3VbF28b21mRSuOcQ&s=10"
+      width="150px"
+      height="200px"
+      alt="Guitar"
+      style="display: block; margin-left: auto; margin-right: auto; width: 50%"
+    /> -->
+    <form class="login-form" action="" method="post">
+      <!-- <label for="user-name">Введите имя</label> -->
+      <h1 id="head" class="stroke-text">Авторизация</h1>
+      <input
+        type="text"
+        minlength="5"
+        maxlength="15"
+        placeholder="Ваш ник"
+        id="user-name"
+        class="big-input"
+      />
+      <br />
+      <!-- <label for="user-password">Введите пароль</label> -->
+      <input
+        type="password"
+        minlength="5"
+        maxlength="20"
+        placeholder="Пароль"
+        id="user-password"
+        class="big-input"
+      />
+      <br />
+      <input
+        type="submit"
+        value="Proceed"
+        id="submit-button"
+        class="stroke-text"
+      />
+    </form>
   </body>
 </html>
