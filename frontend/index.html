@@ -11,16 +11,11 @@
       href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap"
       rel="stylesheet"
     />
+    <link rel="icon" type="image/x-icon" href="images/owl_icon.ico" />
+    <script src="src/auth.js" type="module"></script>
   </head>
   <body class="bg-light">
-    <!-- <img
-      src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTOei92SMbItA65QCFPcD2u4CH63Yvf9d4PZGiGnEU3VbF28b21mRSuOcQ&s=10"
-      width="150px"
-      height="200px"
-      alt="Guitar"
-      style="display: block; margin-left: auto; margin-right: auto; width: 50%"
-    /> -->
-    <form class="login-form" action="" method="post">
+    <form class="login-form" action="/login" method="post">
       <!-- <label for="user-name">Введите имя</label> -->
       <h1 id="head" class="stroke-text">Авторизация</h1>
       <input
@@ -30,8 +25,9 @@
         placeholder="Ваш ник"
         id="user-name"
         class="big-input"
+        name="username"
+        required
       />
-      <br />
       <!-- <label for="user-password">Введите пароль</label> -->
       <input
         type="password"
@@ -40,14 +36,10 @@
         placeholder="Пароль"
         id="user-password"
         class="big-input"
+        name="password"
+        required
       />
-      <br />
-      <input
-        type="submit"
-        value="Proceed"
-        id="submit-button"
-        class="stroke-text"
-      />
+      <input type="submit" value="Proceed" id="submit-button" />
     </form>
   </body>
 </html>

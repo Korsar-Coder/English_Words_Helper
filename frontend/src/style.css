@@ -33,14 +33,15 @@ body {
 
 .login-form {
   color: black;
-  background-color: rgb(0, 255, 255, 0.5);
+  background-color: rgba(0, 255, 255, 0.5);
   text-align: center;
   width: 100%;
+  max-width: 700px;
   height: 100%;
-  /* display: flex;
+  display: flex;
   flex-direction: column;
   justify-content: center; /* Центрирование по вертикали */
-  /* align-items: center; Центрирование по горизонтали */
+  align-items: center;
   font-size: 2em;
   font-family: "Arial", serif;
   font-optical-sizing: auto;
@@ -54,12 +55,11 @@ body {
   padding: 40px;
   padding-bottom: 100px;
   padding-top: 100px;
-  margin-right: 1000px;
-  margin-left: 1000px;
 }
 
 .big-input {
-  width: 600px; /* Задает ширину поля */
+  width: 100%; /* Задает ширину поля */
+  max-width: 600px;
   height: 90px; /* Задает высоту поля */
   font-size: 40px; /* Увеличивает размер вводимого текста */
   padding: 5px 15px; /* Добавляет отступы внутри поля для аккуратности */
@@ -78,6 +78,11 @@ body {
   background-color: rgb(255, 217, 190);
 }
 
+#user-name:hover,
+#user-password:hover {
+  border-color: chocolate;
+}
+
 #user-name {
   margin-bottom: 60px;
 }
@@ -85,14 +90,15 @@ body {
 #submit-button {
   border-radius: 15px;
   border-width: 10px;
-  border-color: rgb(49, 81, 102);
+  /* border-color: rgb(49, 81, 102); */
+  border-color: chocolate;
   margin-top: 100px;
   background-color: rgb(214, 245, 255);
   letter-spacing: 0.2em;
 }
 
 #submit-button:hover {
-  border-color: chocolate;
+  border-color: rgb(49, 81, 102);
 }
 
 input {

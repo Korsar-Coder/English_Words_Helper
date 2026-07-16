@@ -1,5 +1,5 @@
 import uvicorn
-from fastapi import FastAPI, Depends, HTTPException, status, Response
+from fastapi import FastAPI, Depends, HTTPException, status, Response 
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, text, insert
 from database import engine, Base, get_session
@@ -8,7 +8,7 @@ import models
 from models import main_config
 from pydantic import BaseModel, Field 
 from security import get_password_hash, verify_password
-from authx import AuthX, AuthXConfig
+from authx import AuthX, AuthXConfig, TokenPayload
 import googletrans
 
 from fastapi.middleware.cors import CORSMiddleware
@@ -18,6 +18,8 @@ app = FastAPI()
 origins = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
+    "http://localhost:8000",
+    "http://127.0.0.1:8000",
 ]
 
 app.add_middleware(
@@ -33,7 +35,12 @@ translator = googletrans.Translator()
 auth_config = AuthXConfig()
 auth_config.JWT_SECRET_KEY = main_config["JWT_KEY"]
 auth_config.JWT_ACCESS_COOKIE_NAME = "english_access_token"
-auth_config.JWT_TOKEN_LOCATION = ["cookies"]
+auth_config.JWT_TOKEN_LOCATION = ["cookie"]
+
+auth_config.JWT_COOKIE_SAMESITE = "none"  
+auth_config.JWT_COOKIE_SECURE = True      
+
+auth_config.JWT_COOKIE_CSRF_PROTECT = False 
 
 auth_security = AuthX(config=auth_config)
 
@@ -77,7 +84,7 @@ class WordDBSchema(BaseModel):
 #         await conn.run_sync(Base.metadata.create_all)
 #     return {"ok": True}
 
-@app.post("/login")
+@app.post("/api/login")
 async def login(creds: UserFrontendSchema, response: Response, session: SessionDep):
     query = select(models.User.id, models.User.name, models.User.hashed_password).where(
         models.User.name == creds.name
@@ -88,15 +95,19 @@ async def login(creds: UserFrontendSchema, response: Response, session: SessionD
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Такого пользователя нет!")
     if creds.name == result["name"] and verify_password(creds.raw_password, result["hashed_password"]):
         token = auth_security.create_access_token(uid=str(result["id"]))
-        response.set_cookie(auth_config.JWT_ACCESS_COOKIE_NAME, token)
-        return {"access_token": token}
+        # response.set_cookie(auth_config.JWT_ACCESS_COOKIE_NAME, 
+        #                     token, httponly=True,samesite="none",
+        #                     secure= True 
+        #                     )
+        auth_security.set_access_cookies(token, response)
+        return {"status": "success"}    
     raise HTTPException(status_code=401, detail= "incorrect name or password")
 
 # @app.get("/protected", dependencies=[Depends(auth_security.access_token_required)])
 # async def protected():
 #     return {"secret":"goddamn yeah"}
 
-@app.post("/add_word")
+@app.post("/api/add_word")
 async def add_word(data: WordFrontendSchema, session: SessionDep):
     data.origin = data.origin.lower()
     if data.translation == "":
@@ -113,7 +124,7 @@ async def add_word(data: WordFrontendSchema, session: SessionDep):
     await session.commit()
     return {"result": result}
 
-@app.post("/add_user")
+@app.post("/api/add_user")
 async def add_user(data: UserFrontendSchema, session: SessionDep):
     user_in_db = UserDBSchema.hash_password(name= data.name,
                                              raw_password=data.raw_password)
@@ -136,20 +147,25 @@ async def execute_query(query, session):
      result = await session.execute(query)
      return result.mappings().all()
 
-@app.get("/get_user/{name}")
+@app.get("/api/check-auth")
+def check_auth(payload: TokenPayload = Depends(auth_security.access_token_required)):
+    return {"authenticated": True,
+            "user_id": payload.sub}
+
+@app.get("/api/get_user/{name}")
 async def get_user(name: str, session: SessionDep):
     query = select(models.User.name, models.User.id,
                    models.User.hashed_password).where(models.User.name == name)
     result = await execute_query(query, session)
     return result
 
-@app.get("/get_users")
+@app.get("/api/get_users")
 async def get_users(session: SessionDep):
     query = select(models.User)
     result = await execute_query(query, session)    
     return result
 
-@app.get("/get_user_words/{id}")
+@app.get("/api/get_user_words/{id}")
 async def get_words(id: int, session: SessionDep):
     query = select(models.Users_word).where(models.Users_word.user_id == id)
     result = await execute_query(query, session)
