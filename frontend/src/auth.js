@@ -1,10 +1,39 @@
-import "./style.css";
+import "./auth.css";
 import axios from "axios";
 
 document.addEventListener("DOMContentLoaded", () => {
   const formElement = document.querySelector(".login-form");
 
   if (!formElement) return;
+
+  const inputs = document.querySelectorAll(".login-form input");
+
+  inputs.forEach((input, index) => {
+    input.addEventListener("keydown", (e) => {
+      let targetInput = null;
+
+      // Логика переключения
+      switch (e.key) {
+        case "ArrowRight":
+        case "ArrowDown":
+          // Переход вперед (если есть следующий, иначе к первому)
+          targetInput = inputs[index + 1] || inputs[0];
+          break;
+        case "ArrowLeft":
+        case "ArrowUp":
+          // Переход назад (если есть предыдущий, иначе к последнему)
+          targetInput = inputs[index - 1] || inputs[inputs.length - 1];
+          break;
+      }
+
+      // Если нашли нужный инпут, переводим фокус
+      if (targetInput) {
+        e.preventDefault(); // Отменяем стандартное перемещение курсора/скролл
+        targetInput.focus();
+        targetInput.select(); // Выделяем текст в поле (по желанию)
+      }
+    });
+  });
 
   formElement.addEventListener("submit", async (event) => {
     event.preventDefault();

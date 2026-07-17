@@ -1,4 +1,4 @@
-import "./style.css";
+import "./homepage.css";
 import axios from "axios";
 
 // Запускаем в самом начале файла src/dashboard.js
