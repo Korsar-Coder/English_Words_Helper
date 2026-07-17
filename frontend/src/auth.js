@@ -25,7 +25,7 @@ document.addEventListener("DOMContentLoaded", () => {
         withCredentials: true,
       });
       console.log(response.data);
-      window.location.href = "/dashboard.html";
+      window.location.href = "/homepage.html";
     } catch (error) {
       console.error("Ошибка при отправке запроса:", error);
 
@@ -50,7 +50,7 @@ async function checkAuthOnLoginSkin() {
       withCredentials: true,
     });
     // Если запрос успешный (кука есть) -> отправляем на главную
-    window.location.href = "/dashboard.html";
+    window.location.href = "/homepage.html";
   } catch (error) {
     // Если ошибка (куки нет) -> ничего не делаем, пусть пользователь заполняет форму
     console.log("Пользователь не авторизован, показываем форму");

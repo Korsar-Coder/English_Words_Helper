@@ -35,7 +35,7 @@ translator = googletrans.Translator()
 auth_config = AuthXConfig()
 auth_config.JWT_SECRET_KEY = main_config["JWT_KEY"]
 auth_config.JWT_ACCESS_COOKIE_NAME = "english_access_token"
-auth_config.JWT_TOKEN_LOCATION = ["cookie"]
+auth_config.JWT_TOKEN_LOCATION = ["cookies"]
 
 auth_config.JWT_COOKIE_SAMESITE = "none"  
 auth_config.JWT_COOKIE_SECURE = True      

@@ -12,7 +12,7 @@ async function guardDashboard() {
   } catch (error) {
     console.log("Ошибка Куки");
     // Если сервер ответил ошибкой (куки нет/протухла) -> выкидываем на авторизацию
-    window.location.href = "/index.html";
+    window.location.href = "/auth.html";
   }
 }
 guardDashboard();
