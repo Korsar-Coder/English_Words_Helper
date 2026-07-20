@@ -17,3 +17,15 @@ body {
   align-items: center;
   padding: 20px;
 }
+
+#get-words-button {
+  background-color: yellow;
+  font-size: 50px;
+  font-family: "Playfair Display";
+  border-radius: 20px;
+  border-color: rgb(61, 61, 61);
+  border-width: 10px;
+}
+#get-words-button:hover {
+  border-color: grey;
+}

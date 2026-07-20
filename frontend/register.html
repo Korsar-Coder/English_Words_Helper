@@ -1,9 +1,8 @@
 <!doctype html>
-<html lang="ru">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>English Helper</title>
     <link rel="stylesheet" href="src/auth-register.css" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -12,12 +11,12 @@
       rel="stylesheet"
     />
     <link rel="icon" type="image/x-icon" href="images/owl_icon.ico" />
-    <script src="src/auth.js" type="module"></script>
+    <script src="src/register.js" type="module"></script>
+    <title>English Helper</title>
   </head>
-  <body class="bg-light">
-    <form class="login-form" action="/login" method="post">
-      <!-- <label for="user-name">Введите имя</label> -->
-      <h1 id="head" class="stroke-text">Авторизация</h1>
+  <body>
+    <form id="register-form" class="login-form" method="post">
+      <h1 id="head" class="stroke-text">Регистрация</h1>
       <input
         type="text"
         minlength="5"
@@ -38,8 +37,15 @@
         name="password"
         required
       />
-      <input type="submit" value="Proceed" id="submit-button" />
-      <a id="register-link" href="register.html">Нет Аккаунта? Создайте!</a>
+      <input
+        type="password"
+        minlength="5"
+        maxlength="20"
+        placeholder="Повторите пароль"
+        id="user-password-repeat"
+        class="big-input password_repeat"
+        required
+      />
     </form>
   </body>
 </html>

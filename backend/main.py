@@ -94,7 +94,9 @@ async def login(creds: UserFrontendSchema, response: Response, session: SessionD
     if not result:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Такого пользователя нет!")
     if creds.name == result["name"] and verify_password(creds.raw_password, result["hashed_password"]):
-        token = auth_security.create_access_token(uid=str(result["id"]))
+        token = auth_security.create_access_token(uid=str(result["id"]), data={
+            "username" : creds.name, "role" : "user"
+        })
         # response.set_cookie(auth_config.JWT_ACCESS_COOKIE_NAME, 
         #                     token, httponly=True,samesite="none",
         #                     secure= True 
@@ -165,9 +167,11 @@ async def get_users(session: SessionDep):
     result = await execute_query(query, session)    
     return result
 
-@app.get("/api/get_user_words/{id}")
-async def get_words(id: int, session: SessionDep):
-    query = select(models.Users_word).where(models.Users_word.user_id == id)
+@app.get("/api/get_user_words")
+async def get_words(session: SessionDep, 
+                    payload: TokenPayload = Depends(auth_security.access_token_required)):
+    query = select(models.Users_word).where(
+        models.Users_word.user_id == int(payload.sub))
     result = await execute_query(query, session)
     return result
 

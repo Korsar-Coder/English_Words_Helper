@@ -1,5 +1,7 @@
-import "./auth.css";
+import "./auth-register.css";
 import axios from "axios";
+
+const base_url = "http://localhost:8000/api";
 
 document.addEventListener("DOMContentLoaded", () => {
   const formElement = document.querySelector(".login-form");
@@ -45,7 +47,7 @@ document.addEventListener("DOMContentLoaded", () => {
       raw_password: map_data["password"],
     };
     console.log("Данные для отправки: ", request_data);
-    const backend_url = "http://localhost:8000/api/login";
+    const backend_url = base_url + "/login";
     try {
       const response = await axios.post(backend_url, request_data, {
         headers: {
@@ -75,7 +77,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 async function checkAuthOnLoginSkin() {
   try {
-    await axios.get("http://localhost:8000/api/check-auth", {
+    await axios.get(base_url + "/check-auth", {
       withCredentials: true,
     });
     // Если запрос успешный (кука есть) -> отправляем на главную
