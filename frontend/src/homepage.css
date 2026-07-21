@@ -16,16 +16,36 @@ body {
   justify-content: center;
   align-items: center;
   padding: 20px;
+  position: relative;
 }
 
 #get-words-button {
   background-color: yellow;
   font-size: 50px;
   font-family: "Playfair Display";
-  border-radius: 20px;
+  border-radius: 30px;
   border-color: rgb(61, 61, 61);
-  border-width: 10px;
+  border-width: 7px;
+  padding: 10px;
 }
 #get-words-button:hover {
-  border-color: grey;
+  border-color: orange;
+}
+
+#logout-button {
+  font-family: "Playfair Display";
+  font-size: 30px;
+  background-color: rgb(168, 96, 96);
+  color: white;
+  padding: 15px;
+  border-radius: 30px;
+  border-color: black;
+  border-width: 5px;
+  position: absolute;
+  top: 20px;
+  right: 20px;
+}
+
+#logout-button:hover {
+  border-color: red;
 }

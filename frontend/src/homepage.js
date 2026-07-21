@@ -4,6 +4,7 @@ import axios from "axios";
 // Запускаем в самом начале файла src/dashboard.js
 document.addEventListener("DOMContentLoaded", () => {
   const get_words_button = document.querySelector("#get-words-button");
+  const logout_button = document.querySelector("#logout-button");
   const base_url = "http://localhost:8000/api";
 
   async function guardDashboard() {
@@ -19,7 +20,6 @@ document.addEventListener("DOMContentLoaded", () => {
       window.location.href = "/auth.html";
     }
   }
-  guardDashboard();
 
   get_words_button.addEventListener("click", async (event) => {
     event.preventDefault();
@@ -34,4 +34,17 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     guardDashboard();
   });
+
+  logout_button.addEventListener("click", async (event) => {
+    event.preventDefault();
+    let response = await axios.post(
+      base_url + "/logout",
+      {},
+      {
+        withCredentials: true,
+      },
+    );
+    window.location.href = "/auth.html";
+  });
+  guardDashboard();
 });

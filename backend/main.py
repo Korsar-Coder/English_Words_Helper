@@ -128,6 +128,11 @@ async def register(creds: UserFrontendSchema, response: Response, session: Sessi
     await session.commit()
     return {"status": "success"}    
 
+@app.post("/api/logout")
+def logout(response: Response):
+    auth_security.unset_access_cookies(response)
+    return {"status" : "success", "message" : "Вы вышли из системы!"}
+
 # @app.get("/protected", dependencies=[Depends(auth_security.access_token_required)])
 # async def protected():
 #     return {"secret":"goddamn yeah"}
