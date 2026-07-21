@@ -4,11 +4,13 @@ import axios from "axios";
 const base_url = "http://localhost:8000/api";
 
 document.addEventListener("DOMContentLoaded", () => {
-  const formElement = document.querySelector(".login-form");
+  const formElement = document.querySelector("#login-form");
 
   if (!formElement) return;
 
   const inputs = document.querySelectorAll(".login-form input");
+
+  inputs[0].focus();
 
   inputs.forEach((input, index) => {
     input.addEventListener("keydown", (e) => {

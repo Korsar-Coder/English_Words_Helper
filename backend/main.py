@@ -92,7 +92,7 @@ async def login(creds: UserFrontendSchema, response: Response, session: SessionD
     result = await session.execute(query)
     result = result.mappings().first()
     if not result:
-        raise HTTPException(status.HTTP_404_NOT_FOUND, "Такого пользователя нет!")
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "User doesn't exist")
     if creds.name == result["name"] and verify_password(creds.raw_password, result["hashed_password"]):
         token = auth_security.create_access_token(uid=str(result["id"]), data={
             "username" : creds.name, "role" : "user"
@@ -104,6 +104,29 @@ async def login(creds: UserFrontendSchema, response: Response, session: SessionD
         auth_security.set_access_cookies(token, response)
         return {"status": "success"}    
     raise HTTPException(status_code=401, detail= "incorrect name or password")
+
+@app.post("/api/register")
+async def register(creds: UserFrontendSchema, response: Response, session: SessionDep):
+    query = select(models.User).where(
+        models.User.name == creds.name
+    )
+    result = await session.execute(query)
+    result = result.mappings().first()
+    if result:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "User already exists!")
+   
+    user_in_db = UserDBSchema.hash_password(name= creds.name,
+                                             raw_password= creds.raw_password) 
+    new_user = models.User(**user_in_db.model_dump())
+    session.add(new_user)
+    
+    token = auth_security.create_access_token(uid=str(new_user.id), data={
+        "username" : creds.name, "role" : "user"
+    })
+
+    auth_security.set_access_cookies(token, response)
+    await session.commit()
+    return {"status": "success"}    
 
 # @app.get("/protected", dependencies=[Depends(auth_security.access_token_required)])
 # async def protected():
@@ -137,7 +160,7 @@ async def add_user(data: UserFrontendSchema, session: SessionDep):
     if user_exists:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Пользователь с таким именем уже зарегистрирован"
+            detail="User already exists"
         )
     
     new_user = models.User(**user_in_db.model_dump())
