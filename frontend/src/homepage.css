@@ -19,27 +19,11 @@ body {
   position: relative;
 }
 
-#get-words-button {
-  background-color: yellow;
-  font-size: 50px;
-  font-family: "Playfair Display";
-  border-radius: 30px;
-  border-color: rgb(61, 61, 61);
-  border-width: 7px;
-  padding: 10px;
-  position: relative;
-  bottom: 100px;
-}
-#get-words-button:hover {
-  border-color: orange;
-}
-
 #welcome-text {
   color: yellow;
   font-size: 80px;
-  position: absolute;
-  top: 300px;
   letter-spacing: 15px;
+  margin-bottom: 20px;
 }
 
 #logout-button {
@@ -65,18 +49,20 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 40px; /* Отступ между кнопкой и карточками */
+  gap: 20px; /* Отступ между кнопкой и карточками */
   width: 100%;
   max-width: 1200px;
 }
 
 /* Сетка для карточек */
 #words-container {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); /* Авто-сетка */
-  gap: 20px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 40px;
   width: 100%;
-  padding: 10px;
+  padding: 40px;
 }
 
 /* Стили самой карточки */
@@ -88,6 +74,9 @@ body {
   text-align: center;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
   transition: transform 0.2s;
+
+  width: 100%;
+  max-width: 250px;
 }
 
 .word-card:hover {
@@ -101,6 +90,7 @@ body {
   color: #333;
   font-weight: 700;
   margin-bottom: 8px;
+  text-transform: capitalize;
 }
 
 .word-translation {
@@ -108,4 +98,5 @@ body {
   font-size: 22px;
   color: #666;
   font-style: italic;
+  text-transform: capitalize;
 }
