@@ -27,9 +27,19 @@ body {
   border-color: rgb(61, 61, 61);
   border-width: 7px;
   padding: 10px;
+  position: relative;
+  bottom: 100px;
 }
 #get-words-button:hover {
   border-color: orange;
+}
+
+#welcome-text {
+  color: yellow;
+  font-size: 80px;
+  position: absolute;
+  top: 300px;
+  letter-spacing: 15px;
 }
 
 #logout-button {
@@ -48,4 +58,54 @@ body {
 
 #logout-button:hover {
   border-color: red;
+}
+
+/* Обертка, чтобы кнопка и карточки были друг под другом */
+.main-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 40px; /* Отступ между кнопкой и карточками */
+  width: 100%;
+  max-width: 1200px;
+}
+
+/* Сетка для карточек */
+#words-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); /* Авто-сетка */
+  gap: 20px;
+  width: 100%;
+  padding: 10px;
+}
+
+/* Стили самой карточки */
+.word-card {
+  background-color: beige; /* Полупрозрачный белый фон */
+  border: 6px solid #3d3d3d;
+  border-radius: 15px;
+  padding: 20px;
+  text-align: center;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  transition: transform 0.2s;
+}
+
+.word-card:hover {
+  transform: translateY(-5px); /* Легкий эффект подъема при наведении */
+}
+
+/* Стили текста внутри карточки */
+.word-origin {
+  font-family: "Playfair Display", serif;
+  font-size: 28px;
+  color: #333;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.word-translation {
+  font-family: "Arial", sans-serif;
+  font-size: 22px;
+  color: #666;
+  font-style: italic;
 }

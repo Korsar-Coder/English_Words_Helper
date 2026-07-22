@@ -3,8 +3,8 @@ import axios from "axios";
 
 // Запускаем в самом начале файла src/dashboard.js
 document.addEventListener("DOMContentLoaded", () => {
-  const get_words_button = document.querySelector("#get-words-button");
   const logout_button = document.querySelector("#logout-button");
+  const words_container = document.querySelector("#words-container");
   const base_url = "http://localhost:8000/api";
 
   async function guardDashboard() {
@@ -21,19 +21,42 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  get_words_button.addEventListener("click", async (event) => {
-    event.preventDefault();
+  async function get_words() {
     try {
       let response = await axios.get(base_url + "/get_user_words", {
         headers: { "Content-Type": "application/json" },
         withCredentials: true,
       });
-      console.log(response);
+
+      const wordsList = response.data;
+      console.log("Слова пользователя: ", wordsList);
+      words_container.innerHTML = "";
+
+      if (wordsList.length === 0) {
+        wordsContainer.innerHTML =
+          "<p style='font-size: 24px; color: white;'>Ваш словарь пока пуст!</p>";
+        return;
+      }
+
+      wordsList.forEach((word) => {
+        // Создаем элемент карточки
+        const card = document.createElement("div");
+        card.classList.add("word-card");
+        console.log(word["Users_word"].translation);
+        // Наполняем карточку текстом
+        card.innerHTML = `
+        <div class="word-origin">${word["Users_word"].origin}</div>
+        <div class="word-translation">${word["Users_word"].translation}</div>
+      `;
+
+        // Добавляем готовую карточку в общий контейнер
+        words_container.appendChild(card);
+      });
     } catch (error) {
       console.log(error);
     }
     guardDashboard();
-  });
+  }
 
   logout_button.addEventListener("click", async (event) => {
     event.preventDefault();
@@ -47,4 +70,5 @@ document.addEventListener("DOMContentLoaded", () => {
     window.location.href = "/auth.html";
   });
   guardDashboard();
+  get_words();
 });

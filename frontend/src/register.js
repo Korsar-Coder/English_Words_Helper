@@ -47,6 +47,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (map_data["password"] != map_data["password-repeat"]) {
       alert("Пароль не совпадает!");
+      return;
     }
 
     const request_data = {
