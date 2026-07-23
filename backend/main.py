@@ -214,23 +214,26 @@ async def get_current_quiz_words(session: SessionDep,
     if length < 3:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                             detail= "Too few words!")
-    checking_word_index = random.randint(0, length - 1)
-    checking_word = users_words[checking_word_index]
-    other_words = users_words[:checking_word_index] + users_words[checking_word_index + 1:]
-
-    print(checking_word["Users_word"].origin) 
-    for word in other_words:
-        print(word["Users_word"].origin + " : " + word["Users_word"].translation)
-
-    random.shuffle(other_words)
-    incorrect_words = other_words[:2]
+        
+    quiz_questions = []
     
-    response = {"status" : "success", "data": 
-        {"checking_word":checking_word,
-         "incorrect_words": incorrect_words} }
+    for index, word in enumerate(users_words):
+        correct_translation = word["Users_word"].translation
+        other_words = users_words[:index] + users_words[index + 1:]
+        incorrect_words = random.sample(other_words, k=2)
+        incorrect_translations = [word["Users_word"].translation for word in incorrect_words]
+        all_choices = incorrect_translations + [correct_translation]
+        random.shuffle(all_choices)
+        quiz_questions.append({
+            "word_id": word["Users_word"].id,
+            "english_word": word["Users_word"].origin,
+            "correct_answer": correct_translation,
+            "choices": all_choices
+        })
     
-    return response
-    
+    random.shuffle(quiz_questions) 
+    return quiz_questions
+ 
 # @app.post("/drop")
 # async def drop():
 #     async with engine.begin () as conn:
