@@ -5,7 +5,10 @@ import axios from "axios";
 document.addEventListener("DOMContentLoaded", () => {
   const logout_button = document.querySelector("#logout-button");
   const words_container = document.querySelector("#words-container");
+  const start_quiz_button = document.querySelector("#start-quiz-button");
   const base_url = "http://localhost:8000/api";
+  const no_words_html =
+    '<p style="font-size: 50px; color: beige; font-family: Playfair Display">Ваш словарь пока пуст!</p>';
 
   async function guardDashboard() {
     try {
@@ -33,8 +36,7 @@ document.addEventListener("DOMContentLoaded", () => {
       words_container.innerHTML = "";
 
       if (wordsList.length === 0) {
-        wordsContainer.innerHTML =
-          "<p style='font-size: 24px; color: white;'>Ваш словарь пока пуст!</p>";
+        words_container.innerHTML = no_words_html;
         return;
       }
 
@@ -69,6 +71,17 @@ document.addEventListener("DOMContentLoaded", () => {
     );
     window.location.href = "/auth.html";
   });
+
+  start_quiz_button.addEventListener("click", async (event) => {
+    event.preventDefault();
+    if (words_container.innerHTML == no_words_html) {
+      alert("У вас нет слов!");
+      return;
+    }
+
+    window.location.href = "/quiz.html";
+  });
+
   guardDashboard();
   get_words();
 });

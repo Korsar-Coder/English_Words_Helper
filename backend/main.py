@@ -11,6 +11,8 @@ from security import get_password_hash, verify_password
 from authx import AuthX, AuthXConfig, TokenPayload
 import googletrans
 
+import random
+
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
@@ -203,6 +205,32 @@ async def get_words(session: SessionDep,
     result = await execute_query(query, session)
     return result
 
+@app.get("/api/get_current_quiz_words")
+async def get_current_quiz_words(session: SessionDep,
+                                 payload: TokenPayload = Depends(auth_security.access_token_required)):
+    users_words = await get_words(session, payload)
+    #users_words[0]["Users_word"].origin
+    length = len(users_words)
+    if length < 3:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                            detail= "Too few words!")
+    checking_word_index = random.randint(0, length - 1)
+    checking_word = users_words[checking_word_index]
+    other_words = users_words[:checking_word_index] + users_words[checking_word_index + 1:]
+
+    print(checking_word["Users_word"].origin) 
+    for word in other_words:
+        print(word["Users_word"].origin + " : " + word["Users_word"].translation)
+
+    random.shuffle(other_words)
+    incorrect_words = other_words[:2]
+    
+    response = {"status" : "success", "data": 
+        {"checking_word":checking_word,
+         "incorrect_words": incorrect_words} }
+    
+    return response
+    
 # @app.post("/drop")
 # async def drop():
 #     async with engine.begin () as conn:

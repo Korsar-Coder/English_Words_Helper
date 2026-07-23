@@ -100,3 +100,16 @@ body {
   font-style: italic;
   text-transform: capitalize;
 }
+
+#start-quiz-button {
+  font-size: 50px;
+  font-family: "Playfair Display";
+  padding: 15px;
+  border-radius: 20px;
+  background-color: rgb(255, 240, 153);
+  border-width: 10px;
+}
+
+#start-quiz-button:hover {
+  border-color: gold;
+}
