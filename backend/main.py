@@ -211,7 +211,7 @@ async def get_current_quiz_words(session: SessionDep,
     users_words = await get_words(session, payload)
     #users_words[0]["Users_word"].origin
     length = len(users_words)
-    if length < 3:
+    if length < 4:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                             detail= "Too few words!")
         
@@ -220,10 +220,11 @@ async def get_current_quiz_words(session: SessionDep,
     for index, word in enumerate(users_words):
         correct_translation = word["Users_word"].translation
         other_words = users_words[:index] + users_words[index + 1:]
-        incorrect_words = random.sample(other_words, k=2)
+        incorrect_words = random.sample(other_words, k=3)
         incorrect_translations = [word["Users_word"].translation for word in incorrect_words]
         all_choices = incorrect_translations + [correct_translation]
         random.shuffle(all_choices)
+        
         quiz_questions.append({
             "word_id": word["Users_word"].id,
             "english_word": word["Users_word"].origin,

@@ -113,3 +113,11 @@ body {
 #start-quiz-button:hover {
   border-color: gold;
 }
+
+#question-word::first-letter {
+  text-transform: uppercase;
+}
+
+#choices-container::first-letter {
+  text-transform: uppercase;
+}
