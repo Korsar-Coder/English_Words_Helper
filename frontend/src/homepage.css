@@ -118,6 +118,71 @@ body {
   text-transform: uppercase;
 }
 
-#choices-container::first-letter {
-  text-transform: uppercase;
+/* Основной класс для кнопок викторины */
+.quiz-choice-btn {
+  position: relative; /* Обязательно для позиционирования псевдоэлементов внутри */
+  font-family: "Playfair Display", serif;
+  font-size: 24px;
+  color: #333333;
+  background-color: #fcffc9;
+  padding: 15px 30px;
+  border: 4px solid #3d3d3d;
+  border-radius: 12px;
+  cursor: pointer;
+  overflow: hidden; /* Чтобы псевдоэлементы не вылезали за скругленные края */
+  transition: all 0.2s ease-in-out;
+  text-align: center;
+}
+
+/* Эффект при наведении (Hover) */
+.quiz-choice-btn:hover {
+  background-color: #fffde7; /* Легкий желтоватый оттенок */
+  border-color: #ff9800; /* Оранжевая рамка */
+  transform: translateY(-2px); /* Небольшой подъем вверх */
+  padding-left: 45px; /* Сдвигаем текст вправо, освобождая место для псевдоэлемента */
+}
+
+/* Добавляем псевдоэлемент ::before (например, декоративный маркер ответа) */
+.quiz-choice-btn::before {
+  content: "→"; /* Текст или иконка внутри псевдоэлемента */
+  position: absolute;
+  left: -30px; /* Изначально прячем его за левым краем кнопки */
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 24px;
+  color: #ff9800;
+  transition: all 0.2s ease-in-out;
+  opacity: 0;
+}
+
+/* Анимация псевдоэлемента при наведении на саму кнопку */
+.quiz-choice-btn:hover::before {
+  left: 15px; /* Плавно выдвигаем маркер внутрь кнопки */
+  opacity: 1; /* Делаем его видимым */
+}
+
+.quiz-choice-btn.correct {
+  background-color: #e8f5e9 !important;
+  border-color: #4caf50 !important;
+  color: #2e7d32 !important;
+}
+
+.quiz-choice-btn.incorrect {
+  background-color: #ffebee !important;
+  border-color: #f44336 !important;
+  color: #c62828 !important;
+}
+
+#go-home-button-quiz {
+  font-size: 24px;
+  padding: 10px 20px;
+  border-radius: 10px;
+  cursor: pointer;
+  background-color: beige;
+}
+
+#go-home-button-quiz:hover {
+  border-color: orange;
+  transform: translateY(-5%);
+  transition: 0.2s;
 }

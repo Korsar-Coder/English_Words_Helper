@@ -55,11 +55,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     currentQuestion.choices.forEach((choice) => {
       const button = document.createElement("button");
       button.textContent = choice;
-
       // Стилизация кнопок ответов
-      button.style.cssText =
-        "font-size: 24px; padding: 15px; border-radius: 10px; border: 2px solid #333; background: #fff; cursor: pointer; transition: 0.1s;";
 
+      button.classList.add("quiz-choice-btn");
       // Обработка клика по ответу
       button.addEventListener("click", () =>
         handleAnswer(choice, currentQuestion.correct_answer),
@@ -70,13 +68,34 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // 3. Логика проверки ответа
   function handleAnswer(selectedChoice, correctChoice) {
+    // Находим все кнопки вариантов в контейнере
+    const buttons = choicesContainer.querySelectorAll(".quiz-choice-btn");
+
+    buttons.forEach((btn) => {
+      // Отключаем клики на время анимации, чтобы пользователь не нажал две кнопки сразу
+      btn.style.pointerEvents = "none";
+
+      if (btn.textContent === correctChoice) {
+        btn.classList.add("correct"); // Подсвечиваем правильный зеленым
+      }
+      if (
+        btn.textContent === selectedChoice &&
+        selectedChoice !== correctChoice
+      ) {
+        btn.classList.add("incorrect"); // Если пользователь ошибся, подсвечиваем его выбор красным
+      }
+    });
+
     if (selectedChoice === correctChoice) {
       score++;
     }
 
-    // Переходим к следующему вопросу
-    currentQuestionIndex++;
-    showQuestion();
+    // Делаем небольшую паузу в 1 секунду (1000 мс), чтобы пользователь увидел результат,
+    // и только потом переключаем вопрос
+    setTimeout(() => {
+      currentQuestionIndex++;
+      showQuestion();
+    }, 1000);
   }
 
   // 4. Отображение финального экрана результатов
