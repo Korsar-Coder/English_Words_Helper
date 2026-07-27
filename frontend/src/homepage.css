@@ -208,3 +208,64 @@ body {
   color: #f44336; /* Красный цвет при наведении */
   transform: scale(1.2); /* Легкое увеличение */
 }
+
+/* Карточка-кнопка добавления нового слова */
+.add-word-trigger-card {
+  background-color: rgba(255, 255, 255, 0.4);
+  border: 4px dashed #3d3d3d; /* Пунктирная рамка */
+  border-radius: 15px;
+  padding: 20px;
+  text-align: center;
+  cursor: pointer;
+  width: 100%;
+  max-width: 300px;
+  min-height: 120px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 50px; /* Огромный плюс */
+  color: #3d3d3d;
+  transition: all 0.2s ease-in-out;
+}
+
+.add-word-trigger-card:hover {
+  background-color: rgba(255, 255, 255, 0.7);
+  border-color: #4caf50; /* Зеленеет при наведении */
+  color: #4caf50;
+  transform: translateY(-5px);
+}
+
+/* Инпуты внутри карточки добавления */
+.quiz-input {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 10px;
+  border: 2px solid #3d3d3d;
+  border-radius: 8px;
+  font-size: 16px;
+  font-family: "Arial", sans-serif;
+  text-align: center;
+}
+
+/* Кнопки управления формой */
+.form-buttons {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+.form-btn {
+  padding: 6px 12px;
+  border: 2px solid #3d3d3d;
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: "Arial", sans-serif;
+  font-size: 14px;
+}
+
+.form-btn.save {
+  background-color: #a5d6a7;
+}
+.form-btn.cancel {
+  background-color: #ef9a9a;
+}

@@ -22,5 +22,28 @@
       <div id="words-container"></div>
       <button id="start-quiz-button">Начать викторину</button>
     </div>
+    <template id="add-word-template">
+      <div class="word-card add-word-form-card">
+        <input
+          type="text"
+          id="new-origin"
+          placeholder="English word"
+          class="quiz-input"
+          minlength="2"
+          maxlength="20"
+          required
+        />
+        <input
+          type="text"
+          id="new-translation"
+          placeholder="Перевод (опционально)"
+          class="quiz-input"
+        />
+        <div class="form-buttons">
+          <button id="save-word-btn" class="form-btn save">Сохранить</button>
+          <button id="cancel-word-btn" class="form-btn cancel">Отмена</button>
+        </div>
+      </div>
+    </template>
   </body>
 </html>

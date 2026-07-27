@@ -60,7 +60,6 @@ class UserDBSchema(BaseModel):
         return cls(name= name, hashed_password = get_password_hash(raw_password))
    
 class WordFrontendSchema(BaseModel):
-    user_id: int
     origin: str = Field(min_length=2, max_length=20)
     translation: str = ""
     is_origin_english: bool = True
@@ -140,8 +139,9 @@ def logout(response: Response):
 #     return {"secret":"goddamn yeah"}
 
 @app.post("/api/add_word")
-async def add_word(data: WordFrontendSchema, session: SessionDep):
-    data.origin = data.origin.lower()
+async def add_word(data: WordFrontendSchema, session: SessionDep,
+                   payload: TokenPayload = Depends(auth_security.access_token_required)):
+    data.origin = data.origin.lower().strip()
     if data.translation == "":
         data_to_db = await WordDBSchema.translate_word(data.origin, data.is_origin_english)
     else: 
@@ -151,7 +151,7 @@ async def add_word(data: WordFrontendSchema, session: SessionDep):
             data_to_db = WordDBSchema(english_word=data.translation, russian_word=data.origin)
     query = insert(models.Users_word).values(origin= data_to_db.english_word,
                                             translation= data_to_db.russian_word,
-                                            user_id= data.user_id)
+                                            user_id= int(payload.sub))
     result = await session.execute(query)
     await session.commit()
     return {"result": result}

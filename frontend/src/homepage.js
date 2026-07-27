@@ -90,6 +90,73 @@ document.addEventListener("DOMContentLoaded", () => {
         // Добавляем готовую карточку в общий контейнер
         words_container.appendChild(card);
       });
+      const addCardTrigger = document.createElement("div");
+      addCardTrigger.classList.add("add-word-trigger-card");
+      addCardTrigger.innerHTML = "+";
+      addCardTrigger.title = "Добавить новое слово";
+      addCardTrigger.addEventListener("click", () => {
+        // Получаем структуру формы из HTML-шаблона <template>
+        const template = document.querySelector("#add-word-template");
+        const formCard = template.content
+          .cloneNode(true)
+          .querySelector(".add-word-form-card");
+
+        // Временно заменяем кнопку-плюс на карточку с инпутами
+        words_container.replaceChild(formCard, addCardTrigger);
+
+        // Находим элементы управления внутри появившейся формы
+        const saveBtn = formCard.querySelector("#save-word-btn");
+        const cancelBtn = formCard.querySelector("#cancel-word-btn");
+        const inputOrigin = formCard.querySelector("#new-origin");
+        const inputTranslation = formCard.querySelector("#new-translation");
+
+        inputOrigin.focus(); // Сразу ставим фокус на первое поле
+
+        // Кнопка ОТМЕНА: просто возвращает кнопку-плюс на место
+        cancelBtn.addEventListener("click", () => {
+          words_container.replaceChild(addCardTrigger, formCard);
+        });
+
+        // Кнопка СОХРАНИТЬ: отправка на бэкенд
+        saveBtn.addEventListener("click", async () => {
+          const originText = inputOrigin.value.trim();
+          const translationText = inputTranslation.value.trim();
+
+          if (originText.length < 2) {
+            alert("Слово должно быть не короче 2 символов!");
+            return;
+          }
+
+          const wordData = {
+            user_id: 0,
+            origin: originText,
+            translation: translationText,
+            is_origin_english: true,
+          };
+
+          try {
+            const addResponse = await axios.post(
+              base_url + "/add_word",
+              wordData,
+              {
+                withCredentials: true,
+              },
+            );
+
+            console.log("Слово добавлено:", addResponse.data);
+
+            // Имитируем повторный клик по кнопке «Получить слова»,
+            // чтобы весь список красиво перестроился вместе с новым словом
+            get_words();
+          } catch (error) {
+            console.error("Ошибка добавления слова:", error);
+            alert("Не удалось сохранить слово.");
+          }
+        });
+      });
+
+      // Добавляем созданный плюс в самый конец контейнера
+      words_container.appendChild(addCardTrigger);
     } catch (error) {
       console.log(error);
     }
