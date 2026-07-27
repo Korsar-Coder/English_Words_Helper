@@ -67,6 +67,7 @@ body {
 
 /* Стили самой карточки */
 .word-card {
+  position: relative;
   background-color: beige; /* Полупрозрачный белый фон */
   border: 6px solid #3d3d3d;
   border-radius: 15px;
@@ -185,4 +186,25 @@ body {
   border-color: orange;
   transform: translateY(-5%);
   transition: 0.2s;
+}
+
+.delete-word-btn {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  background: none;
+  border: none;
+  font-size: 20px;
+  color: #999;
+  cursor: pointer;
+  line-height: 1;
+  padding: 5px;
+  transition:
+    color 0.2s,
+    transform 0.2s;
+}
+
+.delete-word-btn:hover {
+  color: #f44336; /* Красный цвет при наведении */
+  transform: scale(1.2); /* Легкое увеличение */
 }

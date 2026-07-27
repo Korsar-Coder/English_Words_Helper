@@ -41,15 +41,51 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       wordsList.forEach((word) => {
-        // Создаем элемент карточки
+        word = word["Users_word"];
         const card = document.createElement("div");
         card.classList.add("word-card");
-        console.log(word["Users_word"].translation);
-        // Наполняем карточку текстом
         card.innerHTML = `
-        <div class="word-origin">${word["Users_word"].origin}</div>
-        <div class="word-translation">${word["Users_word"].translation}</div>
-      `;
+    <button class="delete-word-btn" title="Удалить слово">&times;</button>
+    <div class="word-origin">${word.origin}</div>
+    <div class="word-translation">${word.translation}</div>
+  `;
+        const deleteBtn = card.querySelector(".delete-word-btn");
+        deleteBtn.addEventListener("click", async (event) => {
+          event.stopPropagation(); // Предотвращаем срабатывание клика по самой карточке, если оно у вас настроено
+
+          // Подтверждение удаления для пользователя (по желанию)
+          if (
+            !confirm(
+              `Вы уверены, что хотите удалить слово "${word.origin}" с id ${word.id}?`,
+            )
+          )
+            return;
+
+          try {
+            // Отправляем DELETE-запрос на бэкенд, передавая id слова в URL
+            const deleteResponse = await axios.delete(
+              `${base_url}/delete_word_by_id/${word.id}`,
+              {
+                withCredentials: true,
+              },
+            );
+
+            if (deleteResponse.data.status === "success") {
+              // Если сервер успешно удалил из БД, плавно удаляем карточку со страницы
+              card.remove();
+              console.log(`Слово с id ${word.id} успешно удалено`);
+
+              // Если после удаления карточек не осталось, выводим заглушку
+              if (words_container.children.length === 0) {
+                words_container.innerHTML =
+                  "<p style='font-size: 24px; color: white;'>Ваш словарь теперь пуст!</p>";
+              }
+            }
+          } catch (error) {
+            console.error("Ошибка при удалении слова:", error);
+            alert(error.response?.data?.detail || "Не удалось удалить слово.");
+          }
+        });
 
         // Добавляем готовую карточку в общий контейнер
         words_container.appendChild(card);

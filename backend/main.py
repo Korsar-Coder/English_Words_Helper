@@ -1,7 +1,7 @@
 import uvicorn
 from fastapi import FastAPI, Depends, HTTPException, status, Response 
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, text, insert
+from sqlalchemy import select, text, insert, delete
 from database import engine, Base, get_session
 from typing import Annotated
 import models 
@@ -235,6 +235,27 @@ async def get_current_quiz_words(session: SessionDep,
     random.shuffle(quiz_questions) 
     return quiz_questions
  
+@app.delete("/api/delete_word_by_id/{word_id}")
+async def delete_word_by_id(word_id: int, session: SessionDep,
+                                 payload: TokenPayload = Depends(auth_security.access_token_required)):
+    query = select(models.Users_word).where(
+        (models.Users_word.id == word_id) & (models.Users_word.user_id == int(payload.sub))
+    )
+    result = await session.execute(query)
+    word = result.scalar_one_or_none()
+    
+    if not word:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, 
+            detail="Слово не найдено или у вас нет прав на его удаление"
+        )
+        
+    delete_query = delete(models.Users_word).where(models.Users_word.id == word_id)
+    await session.execute(delete_query)
+    await session.commit()
+    
+    return {"status": "success", "message": "Слово успешно удалено"}
+
 # @app.post("/drop")
 # async def drop():
 #     async with engine.begin () as conn:
