@@ -9,6 +9,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const base_url = "http://localhost:8000/api";
   const no_words_html =
     '<p style="font-size: 50px; color: beige; font-family: Playfair Display">Ваш словарь пока пуст!</p>';
+  var incorrect_input = document.querySelector(".incorrect-input");
+
+  let wordsList;
 
   async function guardDashboard() {
     try {
@@ -31,7 +34,7 @@ document.addEventListener("DOMContentLoaded", () => {
         withCredentials: true,
       });
 
-      const wordsList = response.data;
+      wordsList = response.data;
       console.log("Слова пользователя: ", wordsList);
       words_container.innerHTML = "";
 
@@ -170,8 +173,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
   start_quiz_button.addEventListener("click", async (event) => {
     event.preventDefault();
-    if (words_container.innerHTML == no_words_html) {
-      alert("У вас нет слов!");
+    if (wordsList.length < 4) {
+      incorrect_input.style.visibility = "visible";
+      console.log("Мало слов");
+      setTimeout(() => {
+        incorrect_input.style.visibility = "hidden";
+      }, 3000);
       return;
     }
 
