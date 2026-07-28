@@ -9,6 +9,7 @@ document.addEventListener("DOMContentLoaded", () => {
   if (!formElement) return;
 
   const inputs = document.querySelectorAll(".login-form input");
+  const incorrect_input = document.querySelector(".incorrect-input");
 
   inputs[0].focus();
 
@@ -42,6 +43,8 @@ document.addEventListener("DOMContentLoaded", () => {
   formElement.addEventListener("submit", async (event) => {
     event.preventDefault();
 
+    incorrect_input.style.visibility = "hidden";
+
     const formData = new FormData(formElement);
     const map_data = Object.fromEntries(formData);
     const request_data = {
@@ -65,14 +68,18 @@ document.addEventListener("DOMContentLoaded", () => {
       if (error.response) {
         console.log("Статус ошибки:", error.response.status);
         console.log("Детали от сервера:", error.response.data);
-        alert(
-          `Ошибка авторизации: ${error.response.data.message || "Неверные данные"}`,
-        );
+        // alert(
+        //   `Ошибка авторизации: ${error.response.data.message || "Неверные данные"}`,
+        // );
+        incorrect_input.innerHTML = `Ошибка авторизации: ${error.response.data.message || "Неверные данные"}`;
       } else if (error.request) {
-        alert("Сервер не отвечает. Проверьте интернет-соединение.");
+        // alert("Сервер не отвечает. Проверьте интернет-соединение.");
+        incorrect_input.innerHTML =
+          "Сервер не отвечает. Проверьте интернет-соединение.";
       } else {
-        alert("Произошла непредвиденная ошибка.");
+        incorrect_input.innerHTML = "Произошла непредвиденная ошибка.";
       }
+      incorrect_input.style.visibility = "visible";
     }
   });
 });

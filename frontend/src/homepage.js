@@ -35,11 +35,6 @@ document.addEventListener("DOMContentLoaded", () => {
       console.log("Слова пользователя: ", wordsList);
       words_container.innerHTML = "";
 
-      if (wordsList.length === 0) {
-        words_container.innerHTML = no_words_html;
-        return;
-      }
-
       wordsList.forEach((word) => {
         word = word["Users_word"];
         const card = document.createElement("div");
@@ -52,14 +47,6 @@ document.addEventListener("DOMContentLoaded", () => {
         const deleteBtn = card.querySelector(".delete-word-btn");
         deleteBtn.addEventListener("click", async (event) => {
           event.stopPropagation(); // Предотвращаем срабатывание клика по самой карточке, если оно у вас настроено
-
-          // Подтверждение удаления для пользователя (по желанию)
-          if (
-            !confirm(
-              `Вы уверены, что хотите удалить слово "${word.origin}" с id ${word.id}?`,
-            )
-          )
-            return;
 
           try {
             // Отправляем DELETE-запрос на бэкенд, передавая id слова в URL
@@ -117,6 +104,8 @@ document.addEventListener("DOMContentLoaded", () => {
           words_container.replaceChild(addCardTrigger, formCard);
         });
 
+        guardDashboard();
+
         // Кнопка СОХРАНИТЬ: отправка на бэкенд
         saveBtn.addEventListener("click", async () => {
           const originText = inputOrigin.value.trim();
@@ -127,11 +116,17 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
           }
 
+          //Проверяем, ввел ли пользователь слово на английском или русском
+          let is_origin_english = true;
+          let first_letter = originText.toLowerCase()[0];
+          if ("а" <= first_letter && first_letter <= "я") {
+            is_origin_english = false;
+          }
           const wordData = {
             user_id: 0,
             origin: originText,
             translation: translationText,
-            is_origin_english: true,
+            is_origin_english: is_origin_english,
           };
 
           try {
@@ -145,8 +140,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
             console.log("Слово добавлено:", addResponse.data);
 
-            // Имитируем повторный клик по кнопке «Получить слова»,
-            // чтобы весь список красиво перестроился вместе с новым словом
             get_words();
           } catch (error) {
             console.error("Ошибка добавления слова:", error);

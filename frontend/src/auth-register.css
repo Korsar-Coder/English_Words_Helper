@@ -97,7 +97,7 @@ body {
   border-width: 10px;
   /* border-color: rgb(49, 81, 102); */
   border-color: rgb(255, 234, 0);
-  margin-top: 100px;
+  margin-top: 50px;
   margin-bottom: 30px;
   background-color: beige;
   letter-spacing: 0.1em;
@@ -137,4 +137,23 @@ input::placeholder {
 
 #user-password-repeat {
   margin-top: 35px;
+}
+
+.incorrect-input {
+  color: rgb(233, 101, 101);
+  font-size: 35px;
+  font-style: italic;
+  visibility: hidden;
+  font-family: "Arial";
+  animation: blink-animation 2s infinite;
+}
+
+@keyframes blink-animation {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
 }
