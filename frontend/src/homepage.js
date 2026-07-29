@@ -7,8 +7,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const words_container = document.querySelector("#words-container");
   const start_quiz_button = document.querySelector("#start-quiz-button");
   const base_url = "http://localhost:8000/api";
-  const no_words_html =
-    '<p style="font-size: 50px; color: beige; font-family: Playfair Display">Ваш словарь пока пуст!</p>';
   var incorrect_input = document.querySelector(".incorrect-input");
   let wordsList;
 
@@ -143,6 +141,9 @@ document.addEventListener("DOMContentLoaded", () => {
             };
             var new_card = build_word(word_template);
             words_container.appendChild(new_card);
+            words_container.replaceChild(addCardTrigger, formCard);
+            addCardTrigger.remove();
+            words_container.appendChild(addCardTrigger);
             const addResponse = await axios.post(
               base_url + "/add_word",
               wordData,
