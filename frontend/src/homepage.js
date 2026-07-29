@@ -6,6 +6,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const logout_button = document.querySelector("#logout-button");
   const words_container = document.querySelector("#words-container");
   const start_quiz_button = document.querySelector("#start-quiz-button");
+  const addCardTrigger = document.createElement("div");
   const base_url = "http://localhost:8000/api";
   var incorrect_input = document.querySelector(".incorrect-input");
   let wordsList;
@@ -36,6 +37,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const deleteBtn = card.querySelector(".delete-word-btn");
     deleteBtn.addEventListener("click", async (event) => {
       event.stopPropagation(); // Предотвращаем срабатывание клика по самой карточке, если оно у вас настроено
+      console.log("Процесс удаления...");
+      const nextSibling = card.nextSibling;
       try {
         // Отправляем DELETE-запрос на бэкенд, передавая id слова в URL
         var removed_card = card;
@@ -50,13 +53,18 @@ document.addEventListener("DOMContentLoaded", () => {
         if (deleteResponse.data.status === "success") {
           // Если сервер успешно удалил из БД, плавно удаляем карточку со страницы
           console.log(`Слово с id ${card.dataset.id} успешно удалено`);
+          wordsList = wordsList.filter(
+            (w) => String(w.Users_word?.id) !== String(card.dataset.id),
+          );
         }
       } catch (error) {
         console.error("Ошибка при удалении слова:", error);
         //Если не получилось удалить слово, возвращаем его
-        addCardTrigger.remove();
-        words_container.appendChild(removed_card);
-        words_container.appendChild(addCardTrigger);
+        if (nextSibling) {
+          words_container.insertBefore(card, nextSibling);
+        } else {
+          words_container.appendChild(card);
+        }
         alert(error.response?.data?.detail || "Не удалось удалить слово.");
       }
     });
@@ -82,7 +90,6 @@ document.addEventListener("DOMContentLoaded", () => {
         words_container.appendChild(card);
       }
 
-      const addCardTrigger = document.createElement("div");
       addCardTrigger.classList.add("add-word-trigger-card");
       addCardTrigger.innerHTML = "+";
       addCardTrigger.title = "Добавить новое слово";
@@ -133,17 +140,16 @@ document.addEventListener("DOMContentLoaded", () => {
             is_origin_english: is_origin_english,
           };
 
+          const word_template = {
+            origin: originText,
+            translation: translationText,
+            word_id: -1,
+          };
+
+          const new_card = build_word(word_template);
+          words_container.replaceChild(new_card, formCard);
+          words_container.appendChild(addCardTrigger);
           try {
-            const word_template = {
-              origin: originText,
-              translation: translationText,
-              word_id: -1,
-            };
-            var new_card = build_word(word_template);
-            words_container.appendChild(new_card);
-            words_container.replaceChild(addCardTrigger, formCard);
-            addCardTrigger.remove();
-            words_container.appendChild(addCardTrigger);
             const addResponse = await axios.post(
               base_url + "/add_word",
               wordData,
@@ -153,10 +159,17 @@ document.addEventListener("DOMContentLoaded", () => {
             );
             const result = addResponse.data;
             new_card.dataset.id = result["word_id"];
-            new_card.innerHTML = new_card.innerHTML.replace(
-              "Идёт перевод...",
-              result["translation"],
-            );
+            const translationDiv = new_card.querySelector(".word-translation");
+            if (translationDiv) {
+              translationDiv.textContent = result["translation"];
+            }
+            wordsList.push({
+              Users_word: {
+                id: result["word_id"],
+                origin: originText,
+                translation: result["translation"],
+              },
+            });
             console.log("Слово добавлено:", result);
           } catch (error) {
             console.error("Ошибка добавления слова:", error);
