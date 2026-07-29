@@ -25,15 +25,23 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  function build_word(word) {
+  function build_word(word, is_origin_english = true) {
     const card = document.createElement("div");
     card.classList.add("word-card");
     card.dataset.id = word.id;
-    card.innerHTML = `
+    if (!is_origin_english) {
+      card.innerHTML = `
+    <button class="delete-word-btn" title="Удалить слово">&times;</button>
+    <div class="word-origin">${word.translation || "Идёт перевод..."}</div>
+    <div class="word-translation">${word.origin}</div>
+  `;
+    } else {
+      card.innerHTML = `
     <button class="delete-word-btn" title="Удалить слово">&times;</button>
     <div class="word-origin">${word.origin}</div>
     <div class="word-translation">${word.translation || "Идёт перевод..."}</div>
   `;
+    }
     const deleteBtn = card.querySelector(".delete-word-btn");
     deleteBtn.addEventListener("click", async (event) => {
       event.stopPropagation(); // Предотвращаем срабатывание клика по самой карточке, если оно у вас настроено
@@ -146,7 +154,7 @@ document.addEventListener("DOMContentLoaded", () => {
             word_id: -1,
           };
 
-          const new_card = build_word(word_template);
+          const new_card = build_word(word_template, is_origin_english);
           words_container.replaceChild(new_card, formCard);
           words_container.appendChild(addCardTrigger);
           try {
@@ -159,9 +167,17 @@ document.addEventListener("DOMContentLoaded", () => {
             );
             const result = addResponse.data;
             new_card.dataset.id = result["word_id"];
-            const translationDiv = new_card.querySelector(".word-translation");
-            if (translationDiv) {
-              translationDiv.textContent = result["translation"];
+            if (is_origin_english) {
+              const translationDiv =
+                new_card.querySelector(".word-translation");
+              if (translationDiv) {
+                translationDiv.textContent = result["translation"];
+              }
+            } else {
+              const translationDiv = new_card.querySelector(".word-origin");
+              if (translationDiv) {
+                translationDiv.textContent = result["translation"];
+              }
             }
             wordsList.push({
               Users_word: {
