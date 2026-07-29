@@ -10,7 +10,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const no_words_html =
     '<p style="font-size: 50px; color: beige; font-family: Playfair Display">Ваш словарь пока пуст!</p>';
   var incorrect_input = document.querySelector(".incorrect-input");
-
   let wordsList;
 
   async function guardDashboard() {
@@ -27,6 +26,45 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+  function build_word(word) {
+    const card = document.createElement("div");
+    card.classList.add("word-card");
+    card.dataset.id = word.id;
+    card.innerHTML = `
+    <button class="delete-word-btn" title="Удалить слово">&times;</button>
+    <div class="word-origin">${word.origin}</div>
+    <div class="word-translation">${word.translation || "Идёт перевод..."}</div>
+  `;
+    const deleteBtn = card.querySelector(".delete-word-btn");
+    deleteBtn.addEventListener("click", async (event) => {
+      event.stopPropagation(); // Предотвращаем срабатывание клика по самой карточке, если оно у вас настроено
+      try {
+        // Отправляем DELETE-запрос на бэкенд, передавая id слова в URL
+        var removed_card = card;
+        card.remove();
+        const deleteResponse = await axios.delete(
+          `${base_url}/delete_word_by_id/${card.dataset.id}`,
+          {
+            withCredentials: true,
+          },
+        );
+
+        if (deleteResponse.data.status === "success") {
+          // Если сервер успешно удалил из БД, плавно удаляем карточку со страницы
+          console.log(`Слово с id ${card.dataset.id} успешно удалено`);
+        }
+      } catch (error) {
+        console.error("Ошибка при удалении слова:", error);
+        //Если не получилось удалить слово, возвращаем его
+        addCardTrigger.remove();
+        words_container.appendChild(removed_card);
+        words_container.appendChild(addCardTrigger);
+        alert(error.response?.data?.detail || "Не удалось удалить слово.");
+      }
+    });
+    return card;
+  }
+
   async function get_words() {
     try {
       let response = await axios.get(base_url + "/get_user_words", {
@@ -38,48 +76,14 @@ document.addEventListener("DOMContentLoaded", () => {
       console.log("Слова пользователя: ", wordsList);
       words_container.innerHTML = "";
 
-      wordsList.forEach((word) => {
-        word = word["Users_word"];
-        const card = document.createElement("div");
-        card.classList.add("word-card");
-        card.innerHTML = `
-    <button class="delete-word-btn" title="Удалить слово">&times;</button>
-    <div class="word-origin">${word.origin}</div>
-    <div class="word-translation">${word.translation}</div>
-  `;
-        const deleteBtn = card.querySelector(".delete-word-btn");
-        deleteBtn.addEventListener("click", async (event) => {
-          event.stopPropagation(); // Предотвращаем срабатывание клика по самой карточке, если оно у вас настроено
-
-          try {
-            // Отправляем DELETE-запрос на бэкенд, передавая id слова в URL
-            const deleteResponse = await axios.delete(
-              `${base_url}/delete_word_by_id/${word.id}`,
-              {
-                withCredentials: true,
-              },
-            );
-
-            if (deleteResponse.data.status === "success") {
-              // Если сервер успешно удалил из БД, плавно удаляем карточку со страницы
-              card.remove();
-              console.log(`Слово с id ${word.id} успешно удалено`);
-
-              // Если после удаления карточек не осталось, выводим заглушку
-              if (words_container.children.length === 0) {
-                words_container.innerHTML =
-                  "<p style='font-size: 24px; color: white;'>Ваш словарь теперь пуст!</p>";
-              }
-            }
-          } catch (error) {
-            console.error("Ошибка при удалении слова:", error);
-            alert(error.response?.data?.detail || "Не удалось удалить слово.");
-          }
-        });
+      for (let wordData of wordsList) {
+        const word = wordData["Users_word"];
+        const card = build_word(word);
 
         // Добавляем готовую карточку в общий контейнер
         words_container.appendChild(card);
-      });
+      }
+
       const addCardTrigger = document.createElement("div");
       addCardTrigger.classList.add("add-word-trigger-card");
       addCardTrigger.innerHTML = "+";
@@ -126,13 +130,19 @@ document.addEventListener("DOMContentLoaded", () => {
             is_origin_english = false;
           }
           const wordData = {
-            user_id: 0,
             origin: originText,
             translation: translationText,
             is_origin_english: is_origin_english,
           };
 
           try {
+            const word_template = {
+              origin: originText,
+              translation: translationText,
+              word_id: -1,
+            };
+            var new_card = build_word(word_template);
+            words_container.appendChild(new_card);
             const addResponse = await axios.post(
               base_url + "/add_word",
               wordData,
@@ -140,13 +150,17 @@ document.addEventListener("DOMContentLoaded", () => {
                 withCredentials: true,
               },
             );
-
-            console.log("Слово добавлено:", addResponse.data);
-
-            get_words();
+            const result = addResponse.data;
+            new_card.dataset.id = result["word_id"];
+            new_card.innerHTML = new_card.innerHTML.replace(
+              "Идёт перевод...",
+              result["translation"],
+            );
+            console.log("Слово добавлено:", result);
           } catch (error) {
             console.error("Ошибка добавления слова:", error);
-            alert("Не удалось сохранить слово.");
+            new_card.remove();
+            guardDashboard();
           }
         });
       });

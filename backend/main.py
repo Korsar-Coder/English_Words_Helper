@@ -151,10 +151,29 @@ async def add_word(data: WordFrontendSchema, session: SessionDep,
             data_to_db = WordDBSchema(english_word=data.translation, russian_word=data.origin)
     query = insert(models.Users_word).values(origin= data_to_db.english_word,
                                             translation= data_to_db.russian_word,
-                                            user_id= int(payload.sub))
+                                            user_id= int(payload.sub)).returning(models.Users_word.id)
     result = await session.execute(query)
     await session.commit()
-    return {"result": result}
+    return {"status": "success", 
+            "translation" : data_to_db.russian_word if data.is_origin_english else data_to_db.english_word,
+            "word_id" : str(result.scalar_one())}
+
+@app.post("/api/add_word_admin")
+async def add_word(data: WordFrontendSchema, user_id: int, session: SessionDep):
+    data.origin = data.origin.lower().strip()
+    if data.translation == "":
+        data_to_db = await WordDBSchema.translate_word(data.origin, data.is_origin_english)
+    else: 
+        if data.is_origin_english:
+            data_to_db = WordDBSchema(english_word=data.origin, russian_word=data.translation)
+        else: 
+            data_to_db = WordDBSchema(english_word=data.translation, russian_word=data.origin)
+    query = insert(models.Users_word).values(origin= data_to_db.english_word,
+                                            translation= data_to_db.russian_word,
+                                            user_id= user_id)
+    result = await session.execute(query)
+    await session.commit()
+    return {"result": result} 
 
 @app.post("/api/add_user")
 async def add_user(data: UserFrontendSchema, session: SessionDep):
