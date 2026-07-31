@@ -11,11 +11,31 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const cards = words_container.querySelectorAll(".word-card");
   const welcome_text = document.querySelector("#welcome-text");
+  const snowContainer = document.querySelector(".snow-container");
 
   var incorrect_input = document.querySelector(".incorrect-input");
   let wordsList;
   let another_theme = false;
 
+  function start_snow_falling() {
+    snowContainer.style.visibility = "visible";
+    const snowflakesCount = 50; // количество снежинок
+
+    for (let i = 0; i < snowflakesCount; i++) {
+      const snowflake = document.createElement("div");
+      snowflake.classList.add("snowflake");
+
+      // Случайный размер, положение и скорость падения
+      const size = Math.random() * 6 + 2 + "px";
+      snowflake.style.width = size;
+      snowflake.style.height = size;
+      snowflake.style.left = Math.random() * 100 + "vw";
+      snowflake.style.animationDuration = Math.random() * 3 + 2 + "s"; // от 2 до 5 секунд
+      snowflake.style.animationDelay = Math.random() * 5 + "s";
+
+      snowContainer.appendChild(snowflake);
+    }
+  }
   function change_theme() {
     console.log("Меняем тему..");
 
@@ -32,6 +52,7 @@ document.addEventListener("DOMContentLoaded", () => {
         translation.style.color = "black";
       }
     });
+    start_snow_falling();
   }
 
   async function guardDashboard() {
@@ -90,6 +111,7 @@ document.addEventListener("DOMContentLoaded", () => {
             (w) => String(w.Users_word?.id) !== String(card.dataset.id),
           );
           if (card.dataset.english_word == forbidden_word) {
+            snowContainer.style.visibility = "hidden";
             location.reload();
           }
         }

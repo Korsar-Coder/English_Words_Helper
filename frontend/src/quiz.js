@@ -14,6 +14,27 @@ document.addEventListener("DOMContentLoaded", async () => {
   const wordElement = document.querySelector("#question-word");
   const choicesContainer = document.querySelector("#choices-container");
   const scoreText = document.querySelector("#score-text");
+  const snowContainer = document.querySelector(".snow-container");
+
+  function start_snow_falling() {
+    snowContainer.style.visibility = "visible";
+    const snowflakesCount = 50; // количество снежинок
+
+    for (let i = 0; i < snowflakesCount; i++) {
+      const snowflake = document.createElement("div");
+      snowflake.classList.add("snowflake");
+
+      // Случайный размер, положение и скорость падения
+      const size = Math.random() * 6 + 2 + "px";
+      snowflake.style.width = size;
+      snowflake.style.height = size;
+      snowflake.style.left = Math.random() * 100 + "vw";
+      snowflake.style.animationDuration = Math.random() * 3 + 2 + "s"; // от 2 до 5 секунд
+      snowflake.style.animationDelay = Math.random() * 5 + "s";
+
+      snowContainer.appendChild(snowflake);
+    }
+  }
 
   function change_start_theme() {
     quizContainer.style.background = "#6abfdf";
@@ -33,6 +54,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     if (to_change_theme) {
       change_start_theme();
+      start_snow_falling();
     }
     // Запускаем первый вопрос
     showQuestion();
