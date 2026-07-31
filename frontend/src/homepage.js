@@ -1,15 +1,38 @@
 import "./homepage.css";
 import axios from "axios";
 
-// Запускаем в самом начале файла src/dashboard.js
 document.addEventListener("DOMContentLoaded", () => {
   const logout_button = document.querySelector("#logout-button");
   const words_container = document.querySelector("#words-container");
   const start_quiz_button = document.querySelector("#start-quiz-button");
   const addCardTrigger = document.createElement("div");
   const base_url = "http://localhost:8000/api";
+  const forbidden_word = "snowgrave";
+
+  const cards = words_container.querySelectorAll(".word-card");
+  const welcome_text = document.querySelector("#welcome-text");
+
   var incorrect_input = document.querySelector(".incorrect-input");
   let wordsList;
+  let another_theme = false;
+
+  function change_theme() {
+    console.log("Меняем тему..");
+
+    if (start_quiz_button) {
+      start_quiz_button.style.backgroundColor = "#ff5e5e";
+    }
+    if (welcome_text) {
+      welcome_text.style.color = "#1c9bca";
+    }
+    cards.forEach((card) => {
+      card.style.backgroundColor = "#68bbd9";
+      const translation = card.querySelector(".word-translation");
+      if (translation) {
+        translation.style.color = "black";
+      }
+    });
+  }
 
   async function guardDashboard() {
     try {
@@ -35,12 +58,14 @@ document.addEventListener("DOMContentLoaded", () => {
     <div class="word-origin">${word.translation || "Идёт перевод..."}</div>
     <div class="word-translation">${word.origin}</div>
   `;
+      card.dataset.english_word = word.translation;
     } else {
       card.innerHTML = `
     <button class="delete-word-btn" title="Удалить слово">&times;</button>
     <div class="word-origin">${word.origin}</div>
     <div class="word-translation">${word.translation || "Идёт перевод..."}</div>
   `;
+      card.dataset.english_word = word.origin;
     }
     const deleteBtn = card.querySelector(".delete-word-btn");
     deleteBtn.addEventListener("click", async (event) => {
@@ -64,6 +89,9 @@ document.addEventListener("DOMContentLoaded", () => {
           wordsList = wordsList.filter(
             (w) => String(w.Users_word?.id) !== String(card.dataset.id),
           );
+          if (card.dataset.english_word == forbidden_word) {
+            location.reload();
+          }
         }
       } catch (error) {
         console.error("Ошибка при удалении слова:", error);
@@ -92,6 +120,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
       for (let wordData of wordsList) {
         const word = wordData["Users_word"];
+        if (word.origin.toLowerCase() == forbidden_word) {
+          another_theme = true;
+        }
         const card = build_word(word);
 
         // Добавляем готовую карточку в общий контейнер
@@ -168,6 +199,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const result = addResponse.data;
             new_card.dataset.id = result["word_id"];
             if (is_origin_english) {
+              new_card.dataset.english_word = originText;
               const translationDiv =
                 new_card.querySelector(".word-translation");
               if (translationDiv) {
@@ -175,6 +207,7 @@ document.addEventListener("DOMContentLoaded", () => {
               }
             } else {
               const translationDiv = new_card.querySelector(".word-origin");
+              new_card.dataset.english_word = result["translation"];
               if (translationDiv) {
                 translationDiv.textContent = result["translation"];
               }
@@ -186,6 +219,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 translation: result["translation"],
               },
             });
+            if (originText.toLowerCase() == forbidden_word) {
+              change_theme();
+            }
             console.log("Слово добавлено:", result);
           } catch (error) {
             console.error("Ошибка добавления слова:", error);
@@ -195,6 +231,9 @@ document.addEventListener("DOMContentLoaded", () => {
         });
       });
 
+      if (another_theme) {
+        change_theme();
+      }
       // Добавляем созданный плюс в самый конец контейнера
       words_container.appendChild(addCardTrigger);
     } catch (error) {

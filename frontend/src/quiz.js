@@ -6,6 +6,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   let questions = [];
   let currentQuestionIndex = 0;
   let score = 0;
+  let to_change_theme = false;
 
   const quizContainer = document.querySelector("#quiz-container");
   const resultContainer = document.querySelector("#result-container");
@@ -13,6 +14,11 @@ document.addEventListener("DOMContentLoaded", async () => {
   const wordElement = document.querySelector("#question-word");
   const choicesContainer = document.querySelector("#choices-container");
   const scoreText = document.querySelector("#score-text");
+
+  function change_start_theme() {
+    quizContainer.style.background = "#6abfdf";
+    resultContainer.style.background = "#1c9bca";
+  }
 
   // 1. Защита страницы (Проверка авторизации) и загрузка вопросов
   try {
@@ -22,12 +28,17 @@ document.addEventListener("DOMContentLoaded", async () => {
     const response = await axios.get(base_url + "/get_current_quiz_words", {
       withCredentials: true,
     });
-    questions = response.data;
+    questions = response.data["quiz_questions"];
+    to_change_theme = response.data["change_theme"];
 
+    if (to_change_theme) {
+      change_start_theme();
+    }
     // Запускаем первый вопрос
     showQuestion();
   } catch (error) {
     console.error(error);
+    console.log("Ошибка");
     alert(
       error.response?.data?.detail ||
         "Ошибка загрузки теста. Возможно, у вас мало слов.",
@@ -58,6 +69,9 @@ document.addEventListener("DOMContentLoaded", async () => {
       // Стилизация кнопок ответов
 
       button.classList.add("quiz-choice-btn");
+      if (to_change_theme) {
+        button.style.backgroundColor = "#ff9292";
+      }
       // Обработка клика по ответу
       button.addEventListener("click", () =>
         handleAnswer(choice, currentQuestion.correct_answer),
@@ -101,6 +115,12 @@ document.addEventListener("DOMContentLoaded", async () => {
   // 4. Отображение финального экрана результатов
   function showResults() {
     quizContainer.style.display = "none";
+    if (to_change_theme) {
+      const go_home_button = resultContainer.querySelector(
+        "#go-home-button-quiz",
+      );
+      go_home_button.style.backgroundColor = "#ef7b7b";
+    }
     resultContainer.style.display = "block";
     scoreText.textContent = `Правильных ответов: ${score} из ${questions.length}`;
   }

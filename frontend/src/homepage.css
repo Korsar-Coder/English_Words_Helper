@@ -24,6 +24,7 @@ body {
   font-size: 80px;
   letter-spacing: 15px;
   margin-bottom: 20px;
+  transition: color 1.5s ease;
 }
 
 #logout-button {
@@ -34,7 +35,7 @@ body {
   padding: 15px;
   border-radius: 30px;
   border-color: black;
-  border-width: 5px;
+  border-width: 3px;
   position: absolute;
   top: 20px;
   right: 20px;
@@ -75,9 +76,9 @@ body {
   text-align: center;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
   transition: transform 0.2s;
-
   width: 100%;
   max-width: 250px;
+  transition: background-color 1.5s ease;
 }
 
 .word-card:hover {
@@ -96,10 +97,10 @@ body {
 
 .word-translation {
   font-family: "Arial", sans-serif;
-  font-size: 22px;
+  font-size: 24px;
   color: #666;
-  font-style: italic;
   text-transform: capitalize;
+  font-style: italic;
 }
 
 #start-quiz-button {
@@ -109,6 +110,7 @@ body {
   border-radius: 20px;
   background-color: rgb(255, 240, 153);
   border-width: 10px;
+  transition: all 0.5s ease-in-out;
 }
 
 #start-quiz-button:hover {
@@ -123,7 +125,7 @@ body {
 .quiz-choice-btn {
   position: relative; /* Обязательно для позиционирования псевдоэлементов внутри */
   font-family: "Playfair Display", serif;
-  font-size: 24px;
+  font-size: 27px;
   color: #333333;
   background-color: #fcffc9;
   padding: 15px 30px;
@@ -133,6 +135,7 @@ body {
   overflow: hidden; /* Чтобы псевдоэлементы не вылезали за скругленные края */
   transition: all 0.2s ease-in-out;
   text-align: center;
+  letter-spacing: 2px;
 }
 
 /* Эффект при наведении (Hover) */
@@ -194,8 +197,8 @@ body {
   right: 12px;
   background: none;
   border: none;
-  font-size: 20px;
-  color: #999;
+  font-size: 25px;
+  color: #000;
   cursor: pointer;
   line-height: 1;
   padding: 5px;

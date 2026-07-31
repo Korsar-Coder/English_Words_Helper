@@ -228,6 +228,10 @@ async def get_words(session: SessionDep,
 async def get_current_quiz_words(session: SessionDep,
                                  payload: TokenPayload = Depends(auth_security.access_token_required)):
     users_words = await get_words(session, payload)
+    
+    forbidden_word = "snowgrave"
+    to_change_theme = False
+
     #users_words[0]["Users_word"].origin
     length = len(users_words)
     if length < 4:
@@ -237,6 +241,8 @@ async def get_current_quiz_words(session: SessionDep,
     quiz_questions = []
     
     for index, word in enumerate(users_words):
+        if (word["Users_word"].origin == forbidden_word):
+            to_change_theme = True
         correct_translation = word["Users_word"].translation
         other_words = users_words[:index] + users_words[index + 1:]
         incorrect_words = random.sample(other_words, k=3)
@@ -252,7 +258,8 @@ async def get_current_quiz_words(session: SessionDep,
         })
     
     random.shuffle(quiz_questions) 
-    return quiz_questions
+    return {"quiz_questions": quiz_questions,
+            "change_theme" : to_change_theme}
  
 @app.delete("/api/delete_word_by_id/{word_id}")
 async def delete_word_by_id(word_id: int, session: SessionDep,
