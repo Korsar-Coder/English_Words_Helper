@@ -5,19 +5,42 @@ document.addEventListener("DOMContentLoaded", () => {
   const logout_button = document.querySelector("#logout-button");
   const words_container = document.querySelector("#words-container");
   const start_quiz_button = document.querySelector("#start-quiz-button");
+  const snowgrave_button = document.querySelector("#snowgrave-button");
   const addCardTrigger = document.createElement("div");
   const base_url = "http://localhost:8000/api";
-  const forbidden_word = "snowgrave";
+
+  if (!words_container) {
+    console.log(window.another_theme);
+    console.error("Element #words-container not found!");
+    return;
+  }
 
   const cards = words_container.querySelectorAll(".word-card");
   const welcome_text = document.querySelector("#welcome-text");
   const snowContainer = document.querySelector(".snow-container");
 
+  const default_colors = {
+    start_quiz_button_background_color: "rgb(255, 240, 153)",
+    welcome_text_color: "yellow",
+    card_background_color: "beige",
+  };
+
   var incorrect_input = document.querySelector(".incorrect-input");
   let wordsList;
-  let another_theme = false;
+  window.another_theme = false;
+
+  snowgrave_button.addEventListener("click", () => {
+    if (!window.another_theme) {
+      change_theme();
+      window.another_theme = true;
+    } else {
+      change_theme_back();
+      window.another_theme = false;
+    }
+  });
 
   function start_snow_falling() {
+    snowContainer.style.opacity = 0.8;
     snowContainer.style.visibility = "visible";
     const snowflakesCount = 50; // количество снежинок
 
@@ -36,9 +59,8 @@ document.addEventListener("DOMContentLoaded", () => {
       snowContainer.appendChild(snowflake);
     }
   }
-  function change_theme() {
-    console.log("Меняем тему..");
 
+  function change_theme() {
     if (start_quiz_button) {
       start_quiz_button.style.backgroundColor = "#ff5e5e";
     }
@@ -53,6 +75,28 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
     start_snow_falling();
+  }
+
+  function change_theme_back() {
+    if (start_quiz_button) {
+      start_quiz_button.style.backgroundColor =
+        default_colors.start_quiz_button_background_color;
+    }
+    if (welcome_text) {
+      welcome_text.style.color = default_colors.welcome_text_color;
+    }
+    cards.forEach((card) => {
+      card.style.backgroundColor = default_colors.card_background_color;
+      const translation = card.querySelector(".word-translation");
+      if (translation) {
+        translation.style.color = "black";
+      }
+    });
+    snowContainer.style.opacity = 0;
+    setTimeout(() => {
+      snowContainer.style.visibility = "hidden";
+    }, 500);
+    snowContainer.replaceChildren();
   }
 
   async function guardDashboard() {
@@ -110,10 +154,10 @@ document.addEventListener("DOMContentLoaded", () => {
           wordsList = wordsList.filter(
             (w) => String(w.Users_word?.id) !== String(card.dataset.id),
           );
-          if (card.dataset.english_word == forbidden_word) {
-            snowContainer.style.visibility = "hidden";
-            location.reload();
-          }
+          // if (card.dataset.english_word == forbidden_word) {
+          //   snowContainer.style.visibility = "hidden";
+          //   location.reload();
+          // }
         }
       } catch (error) {
         console.error("Ошибка при удалении слова:", error);
@@ -142,9 +186,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       for (let wordData of wordsList) {
         const word = wordData["Users_word"];
-        if (word.origin.toLowerCase() == forbidden_word) {
-          another_theme = true;
-        }
+
         const card = build_word(word);
 
         // Добавляем готовую карточку в общий контейнер
@@ -195,6 +237,7 @@ document.addEventListener("DOMContentLoaded", () => {
           if ("а" <= first_letter && first_letter <= "я") {
             is_origin_english = false;
           }
+
           const wordData = {
             origin: originText,
             translation: translationText,
@@ -241,21 +284,16 @@ document.addEventListener("DOMContentLoaded", () => {
                 translation: result["translation"],
               },
             });
-            if (originText.toLowerCase() == forbidden_word) {
-              change_theme();
-            }
             console.log("Слово добавлено:", result);
           } catch (error) {
             console.error("Ошибка добавления слова:", error);
             new_card.remove();
             guardDashboard();
+            location.reload();
           }
         });
       });
 
-      if (another_theme) {
-        change_theme();
-      }
       // Добавляем созданный плюс в самый конец контейнера
       words_container.appendChild(addCardTrigger);
     } catch (error) {

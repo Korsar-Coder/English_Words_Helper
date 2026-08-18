@@ -25,7 +25,38 @@ body {
   letter-spacing: 15px;
   margin-bottom: 20px;
   transition: color 1.5s ease;
+  animation: floatUpDown 1.5s ease-in-out infinite;
 }
+
+@keyframes floatUpDown {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-30px);
+  }
+}
+
+.parent{
+  position: absolute;
+  border: 1px solid;
+  top: 40px;
+  right:40px;
+  z-index: 10;
+}
+
+#bottom-buttons {
+  display: flex;
+  flex-direction: column;
+  gap:10px;
+  top:20px;
+  align-items: flex-end;
+}
+
+#bottom-buttons button {
+  width: 100%;
+  min-width: 160px; }
 
 #logout-button {
   font-family: "Playfair Display";
@@ -36,13 +67,27 @@ body {
   border-radius: 30px;
   border-color: black;
   border-width: 3px;
-  position: absolute;
   top: 20px;
   right: 20px;
 }
 
 #logout-button:hover {
   border-color: red;
+}
+
+#snowgrave-button{
+  font-size: 35px;
+  font-family: "Playfair Display"; 
+  background-color: rgb(92, 242, 239);
+  padding: 10px;
+  border-radius: 30px;
+  border-width: 5px;
+  border-color: rgb(94, 47, 47);
+  top:20px
+}
+
+#snowgrave-button:hover{
+  background-color: rgb(249, 161, 161);
 }
 
 /* Обертка, чтобы кнопка и карточки были друг под другом */
@@ -302,6 +347,7 @@ body {
   z-index: 9999;
   overflow: hidden;
   visibility: hidden;
+  transition: opacity 0.5s ease;
 }
 
 .snowflake {

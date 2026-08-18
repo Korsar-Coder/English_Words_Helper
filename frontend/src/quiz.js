@@ -6,8 +6,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   let questions = [];
   let currentQuestionIndex = 0;
   let score = 0;
-  let to_change_theme = false;
 
+  console.log(window.another_theme);
   const quizContainer = document.querySelector("#quiz-container");
   const resultContainer = document.querySelector("#result-container");
   const progressElement = document.querySelector("#progress");
@@ -50,9 +50,9 @@ document.addEventListener("DOMContentLoaded", async () => {
       withCredentials: true,
     });
     questions = response.data["quiz_questions"];
-    to_change_theme = response.data["change_theme"];
 
-    if (to_change_theme) {
+    if (window.another_theme) {
+      console.log("Другая тема..");
       change_start_theme();
       start_snow_falling();
     }
@@ -61,10 +61,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   } catch (error) {
     console.error(error);
     console.log("Ошибка");
-    alert(
-      error.response?.data?.detail ||
-        "Ошибка загрузки теста. Возможно, у вас мало слов.",
-    );
     window.location.href = "/homepage.html";
   }
 
@@ -91,7 +87,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       // Стилизация кнопок ответов
 
       button.classList.add("quiz-choice-btn");
-      if (to_change_theme) {
+      if (window.another_theme) {
         button.style.backgroundColor = "#ff9292";
       }
       // Обработка клика по ответу
@@ -137,7 +133,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   // 4. Отображение финального экрана результатов
   function showResults() {
     quizContainer.style.display = "none";
-    if (to_change_theme) {
+    if (window.another_theme) {
       const go_home_button = resultContainer.querySelector(
         "#go-home-button-quiz",
       );
