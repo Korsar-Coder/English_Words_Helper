@@ -34,7 +34,7 @@ body {
     transform: translateY(0);
   }
   50% {
-    transform: translateY(-30px);
+    transform: translateY(-20px);
   }
 }
 
@@ -160,6 +160,11 @@ body {
 
 #start-quiz-button:hover {
   border-color: gold;
+}
+
+#question-word {
+  transition: color 1.5s ease;
+  animation: floatUpDown 1.5s ease-in-out infinite;
 }
 
 #question-word::first-letter {
