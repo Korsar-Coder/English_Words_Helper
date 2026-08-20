@@ -39,6 +39,7 @@ translator = googletrans.Translator()
 auth_config = AuthXConfig()
 auth_config.JWT_SECRET_KEY = main_config["JWT_KEY"]
 auth_config.JWT_ACCESS_COOKIE_NAME = "english_access_token"
+auth_config.JWT_REFRESH_COOKIE_NAME = "english_refresh_token"
 auth_config.JWT_TOKEN_LOCATION = ["cookies"]
 
 auth_config.JWT_ACCESS_TOKEN_EXPIRES = timedelta(minutes=40)
@@ -100,6 +101,21 @@ class WordDBSchema(BaseModel):
 #     return {"ok": True}
 
 
+def create_access_refresh_tokens(user_id: str, user_name: str, response: Response):
+    token_params = {
+        "uid": user_id,
+        "data": {"username": user_name, "role": "user"},
+    }
+    access_token = auth_security.create_access_token(**token_params)
+    refresh_token = auth_security.create_refresh_token(**token_params)
+
+    access_max_age = int(auth_config.JWT_ACCESS_TOKEN_EXPIRES.total_seconds())
+    refresh_max_age = int(auth_config.JWT_REFRESH_TOKEN_EXPIRES.total_seconds())
+
+    auth_security.set_access_cookies(access_token, response, max_age=access_max_age)
+    auth_security.set_refresh_cookies(refresh_token, response, max_age=refresh_max_age)
+
+
 @app.post("/api/login")
 async def login(creds: UserFrontendSchema, response: Response, session: SessionDep):
     query = select(models.User.id, models.User.name, models.User.hashed_password).where(
@@ -112,13 +128,8 @@ async def login(creds: UserFrontendSchema, response: Response, session: SessionD
     if creds.name == result["name"] and verify_password(
         creds.raw_password, result["hashed_password"]
     ):
-        token_params = {
-            "uid": str(result["id"]),
-            "data": {"username": creds.name, "role": "user"},
-        }
-        token = auth_security.create_access_token(**token_params)
 
-        auth_security.set_access_cookies(token, response)
+        create_access_refresh_tokens(str(result["id"]), creds.name, response)
 
         return {"status": "success"}
     raise HTTPException(status_code=401, detail="incorrect name or password")
@@ -138,23 +149,15 @@ async def register(creds: UserFrontendSchema, response: Response, session: Sessi
     new_user = models.User(**user_in_db.model_dump())
     session.add(new_user)
 
-    token_params = {
-        "uid": str(new_user.id),
-        "data": {"username": creds.name, "role": "user"},
-    }
-    access_token = auth_security.create_access_token(**token_params)
+    create_access_refresh_tokens(str(new_user.id), creds.name, response)
 
-    refresh_token = auth_security.create_refresh_token(**token_params)
-
-    auth_security.set_access_cookies(access_token, response)
-
-    auth_security.set_refresh_cookies(refresh_token, response)
     await session.commit()
     return {"status": "success"}
 
 
 @app.post("/api/logout")
 def logout(response: Response):
+    auth_security.unset_refresh_cookies(response)
     auth_security.unset_access_cookies(response)
     return {"status": "success", "message": "Вы вышли из системы!"}
 
@@ -260,6 +263,26 @@ async def execute_query(query, session):
 @app.get("/api/check-auth")
 def check_auth(payload: TokenPayload = Depends(auth_security.access_token_required)):
     return {"authenticated": True, "user_id": payload.sub}
+
+
+@app.get("/api/refresh")
+async def refresh_tokens(
+    session: SessionDep,
+    response: Response,
+    payload: TokenPayload = Depends(auth_security.refresh_token_required),
+):
+    user_id = payload.sub
+    query = select(models.User.name).where(models.User.id == int(user_id))
+    result = await session.execute(query)
+    user_name = result.scalar_one_or_none()
+    if not user_name:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Не удалось определить пользователя по токену",
+        )
+
+    create_access_refresh_tokens(user_id, user_name, response)
+    return {"status": "success", "message": "Токены успешно обновлены"}
 
 
 @app.get("/api/get_user/{name}")

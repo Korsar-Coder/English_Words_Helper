@@ -92,8 +92,13 @@ async function checkAuthOnLoginSkin() {
     // Если запрос успешный (кука есть) -> отправляем на главную
     window.location.href = "/homepage.html";
   } catch (error) {
-    // Если ошибка (куки нет) -> ничего не делаем, пусть пользователь заполняет форму
-    console.log("Пользователь не авторизован, показываем форму");
+    const backend_url = base_url + "/refresh";
+    try {
+      await axios.get(backend_url, { withCredentials: true });
+      window.location.href = "/homepage.html";
+    } catch {
+      console.log("Пользователь не авторизован, показываем форму");
+    }
     console.log(error);
   }
 }
