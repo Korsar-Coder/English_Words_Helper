@@ -7,7 +7,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   let currentQuestionIndex = 0;
   let score = 0;
 
-  console.log(window.another_theme);
   const quizContainer = document.querySelector("#quiz-container");
   const resultContainer = document.querySelector("#result-container");
   const progressElement = document.querySelector("#progress");
@@ -16,6 +15,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   const scoreText = document.querySelector("#score-text");
   const snowContainer = document.querySelector(".snow-container");
 
+  const another_theme = localStorage.getItem("another_theme");
+
+  console.log(another_theme);
   function start_snow_falling() {
     snowContainer.style.visibility = "visible";
     const snowflakesCount = 50; // количество снежинок
@@ -51,7 +53,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
     questions = response.data["quiz_questions"];
 
-    if (window.another_theme) {
+    if (another_theme === "true") {
       console.log("Другая тема..");
       change_start_theme();
       start_snow_falling();
@@ -87,7 +89,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       // Стилизация кнопок ответов
 
       button.classList.add("quiz-choice-btn");
-      if (window.another_theme) {
+      if (another_theme === "true") {
         button.style.backgroundColor = "#ff9292";
       }
       // Обработка клика по ответу
@@ -133,7 +135,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   // 4. Отображение финального экрана результатов
   function showResults() {
     quizContainer.style.display = "none";
-    if (window.another_theme) {
+    if (another_theme === "true") {
       const go_home_button = resultContainer.querySelector(
         "#go-home-button-quiz",
       );

@@ -10,8 +10,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const base_url = "http://localhost:8000/api";
 
   if (!words_container) {
-    console.log(window.another_theme);
-    console.error("Element #words-container not found!");
     return;
   }
 
@@ -27,15 +25,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
   var incorrect_input = document.querySelector(".incorrect-input");
   let wordsList;
-  window.another_theme = false;
-
+  let another_theme = String(localStorage.getItem("another_theme") || "false");
+  localStorage.setItem("another_theme", another_theme);
+  console.log(another_theme);
   snowgrave_button.addEventListener("click", () => {
-    if (!window.another_theme) {
+    if (another_theme === "false") {
       change_theme();
-      window.another_theme = true;
+      another_theme = "true";
+      localStorage.setItem("another_theme", "true");
+      console.log(localStorage.getItem("another_theme"));
     } else {
       change_theme_back();
-      window.another_theme = false;
+      another_theme = "false";
+      localStorage.setItem("another_theme", "false");
+      console.log(localStorage.getItem("another_theme"));
     }
   });
 
@@ -75,6 +78,10 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
     start_snow_falling();
+  }
+
+  if (another_theme === "true") {
+    change_theme();
   }
 
   function change_theme_back() {
@@ -325,7 +332,9 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
+    console.log(another_theme);
     window.location.href = "/quiz.html";
+    return;
   });
 
   guardDashboard();
