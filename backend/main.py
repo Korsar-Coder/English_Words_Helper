@@ -9,10 +9,11 @@ from models import main_config
 from pydantic import BaseModel, Field
 from security import get_password_hash, verify_password
 from authx import AuthX, AuthXConfig, TokenPayload
-import googletrans
-
 import random
+from translator import translate
 
+import asyncio
+from asyncio import AbstractEventLoop
 from fastapi.middleware.cors import CORSMiddleware
 
 from datetime import datetime, timedelta, timezone
@@ -33,8 +34,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-translator = googletrans.Translator()
 
 auth_config = AuthXConfig()
 auth_config.JWT_SECRET_KEY = main_config["JWT_KEY"]
@@ -80,25 +79,22 @@ class WordDBSchema(BaseModel):
     russian_word: str
 
     @classmethod
-    async def translate_word(cls, origin: str, is_orig_eng: bool):
+    async def translate_word(
+        cls, loop: AbstractEventLoop, origin: str, is_orig_eng: bool
+    ):
         if is_orig_eng:
             _english_word = origin
-            _russian_word = await translator.translate(origin, src="en", dest="ru")
-            _russian_word = _russian_word.text
+            _russian_word = await loop.run_in_executor(
+                None, translate, origin, "en", "ru"
+            )
         else:
             _russian_word = origin
-            _english_word = await translator.translate(origin, src="ru", dest="en")
-            _english_word = _english_word.text
+            _english_word = await loop.run_in_executor(
+                None, translate, origin, "ru", "en"
+            )
         return cls(
             origin=origin, english_word=_english_word, russian_word=_russian_word
         )
-
-
-# @app.post("/setup_database")
-# async def setup_database():
-#     async with engine.begin() as conn:
-#         await conn.run_sync(Base.metadata.create_all)
-#     return {"ok": True}
 
 
 def create_access_refresh_tokens(user_id: str, user_name: str, response: Response):
@@ -162,11 +158,6 @@ def logout(response: Response):
     return {"status": "success", "message": "Вы вышли из системы!"}
 
 
-# @app.get("/protected", dependencies=[Depends(auth_security.access_token_required)])
-# async def protected():
-#     return {"secret":"goddamn yeah"}
-
-
 @app.post("/api/add_word")
 async def add_word(
     data: WordFrontendSchema,
@@ -174,9 +165,10 @@ async def add_word(
     payload: TokenPayload = Depends(auth_security.access_token_required),
 ):
     data.origin = data.origin.lower().strip()
+    loop = asyncio.get_running_loop()
     if data.translation == "":
         data_to_db = await WordDBSchema.translate_word(
-            data.origin, data.is_origin_english
+            loop, data.origin, data.is_origin_english
         )
     else:
         if data.is_origin_english:
@@ -207,32 +199,6 @@ async def add_word(
         ),
         "word_id": str(result.scalar_one()),
     }
-
-
-@app.post("/api/add_word_admin")
-async def add_word(data: WordFrontendSchema, user_id: int, session: SessionDep):
-    data.origin = data.origin.lower().strip()
-    if data.translation == "":
-        data_to_db = await WordDBSchema.translate_word(
-            data.origin, data.is_origin_english
-        )
-    else:
-        if data.is_origin_english:
-            data_to_db = WordDBSchema(
-                english_word=data.origin, russian_word=data.translation
-            )
-        else:
-            data_to_db = WordDBSchema(
-                english_word=data.translation, russian_word=data.origin
-            )
-    query = insert(models.Users_word).values(
-        origin=data_to_db.english_word,
-        translation=data_to_db.russian_word,
-        user_id=user_id,
-    )
-    result = await session.execute(query)
-    await session.commit()
-    return {"result": result}
 
 
 @app.post("/api/add_user")
@@ -283,22 +249,6 @@ async def refresh_tokens(
 
     create_access_refresh_tokens(user_id, user_name, response)
     return {"status": "success", "message": "Токены успешно обновлены"}
-
-
-@app.get("/api/get_user/{name}")
-async def get_user(name: str, session: SessionDep):
-    query = select(models.User.name, models.User.id, models.User.hashed_password).where(
-        models.User.name == name
-    )
-    result = await execute_query(query, session)
-    return result
-
-
-@app.get("/api/get_users")
-async def get_users(session: SessionDep):
-    query = select(models.User)
-    result = await execute_query(query, session)
-    return result
 
 
 @app.get("/api/get_user_words")
@@ -376,12 +326,6 @@ async def delete_word_by_id(
 
     return {"status": "success", "message": "Слово успешно удалено"}
 
-
-# @app.post("/drop")
-# async def drop():
-#     async with engine.begin () as conn:
-#         await conn.execute(text("DROP TABLE users_words CASCADE"))
-#         await conn.execute(text("DROP TABLE users CASCADE"))
 
 if __name__ == "__main__":
     uvicorn.run("main:app", reload=True)

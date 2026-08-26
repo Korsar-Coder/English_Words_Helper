@@ -1,3 +1,4 @@
+.env
 # === Global & IDE ===
 .DS_Store
 .idea
