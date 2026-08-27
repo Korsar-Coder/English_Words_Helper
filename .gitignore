@@ -5,8 +5,6 @@
 *.sw?
 
 # === Backend (Python) ===
-/backend/config.json
-/backend/alembic.ini
 backend/.venv/
 backend/__pycache__/
 backend/.env

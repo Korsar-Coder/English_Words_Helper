@@ -5,18 +5,17 @@ from sqlalchemy import select, text, insert, delete
 from database import engine, Base, get_session
 from typing import Annotated
 import models
-from models import main_config
 from pydantic import BaseModel, Field
 from security import get_password_hash, verify_password
 from authx import AuthX, AuthXConfig, TokenPayload
 import random
 from translator import translate
-
+import os
 import asyncio
 from asyncio import AbstractEventLoop
 from fastapi.middleware.cors import CORSMiddleware
 
-from datetime import datetime, timedelta, timezone
+from datetime import timedelta
 
 app = FastAPI()
 
@@ -36,7 +35,7 @@ app.add_middleware(
 )
 
 auth_config = AuthXConfig()
-auth_config.JWT_SECRET_KEY = main_config["JWT_KEY"]
+auth_config.JWT_SECRET_KEY = os.getenv("JWT_KEY")
 auth_config.JWT_ACCESS_COOKIE_NAME = "english_access_token"
 auth_config.JWT_REFRESH_COOKIE_NAME = "english_refresh_token"
 auth_config.JWT_TOKEN_LOCATION = ["cookies"]
@@ -85,12 +84,12 @@ class WordDBSchema(BaseModel):
         if is_orig_eng:
             _english_word = origin
             _russian_word = await loop.run_in_executor(
-                None, translate, origin, "en", "ru"
+                None, translate, origin, "english", "russian"
             )
         else:
             _russian_word = origin
             _english_word = await loop.run_in_executor(
-                None, translate, origin, "ru", "en"
+                None, translate, origin, "russian", "english"
             )
         return cls(
             origin=origin, english_word=_english_word, russian_word=_russian_word

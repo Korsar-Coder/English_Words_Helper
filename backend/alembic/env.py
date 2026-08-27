@@ -1,42 +1,27 @@
 import os
 import sys
 from alembic import context
+from dotenv import load_dotenv
+from pathlib import Path
 
+# this is the Alembic Config object, which provides
+# access to the values within the .ini file in use.
 config = context.config
 
-PROJECT_ROOT = os.path.abspath(
-    os.path.dirname(context.config.config_file_name)
-)
-print("-" * 10 + "\n" + PROJECT_ROOT, flush=True)
+# 2 dirs up: alembic/ -> backend/ -> main_folder/.env
+env_path = Path(__file__).resolve().parent.parent.parent / ".env"
+load_dotenv(dotenv_path=env_path)
+
+PROJECT_ROOT = os.path.abspath(os.path.dirname(context.config.config_file_name))
 sys.path.append(PROJECT_ROOT)
 from logging.config import fileConfig
-# import json
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 from database import Base
 from models import *
 
-# this is the Alembic Config object, which provides
-# access to the values within the .ini file in use.
-
-# with open("config.json", "r") as file:
-#     secrets = json.load(file)
-
-# print(secrets)
-
-# db_password = secrets.get("password")
-# db_username = secrets.get("user")
-# db_name = secrets.get("database")
-# current_url = config.get_main_option("sqlalchemy.url")
-# replacements = {
-#     "USER": db_username,
-#     "PASSWORD": db_password,
-#     "DBNAME": db_name
-# }
-# for old, new in replacements.items():
-#     current_url = current_url.replace(old, new)
-
-# config.set_main_option("sqlalchemy.url", current_url)
+database_url = os.getenv("DATABASE_URL")
+config.set_main_option("sqlalchemy.url", database_url)
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
@@ -47,7 +32,7 @@ if config.config_file_name is not None:
 # for 'autogenerate' support
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
-target_metadata = Base.metadata 
+target_metadata = Base.metadata
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:
@@ -93,9 +78,7 @@ def run_migrations_online() -> None:
     )
 
     with connectable.connect() as connection:
-        context.configure(
-            connection=connection, target_metadata=target_metadata
-        )
+        context.configure(connection=connection, target_metadata=target_metadata)
 
         with context.begin_transaction():
             context.run_migrations()
