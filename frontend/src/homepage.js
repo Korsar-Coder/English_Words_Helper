@@ -7,7 +7,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const start_quiz_button = document.querySelector("#start-quiz-button");
   const snowgrave_button = document.querySelector("#snowgrave-button");
   const addCardTrigger = document.createElement("div");
-  const base_url = "http://localhost:8000/api";
 
   if (!words_container) {
     return;
@@ -108,7 +107,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   async function guardDashboard() {
     try {
-      await axios.get(base_url + "/check-auth", {
+      await axios.get("/api/check-auth", {
         withCredentials: true,
       });
       console.log("Добро пожаловать на главную страницу!");
@@ -146,10 +145,9 @@ document.addEventListener("DOMContentLoaded", () => {
       const nextSibling = card.nextSibling;
       try {
         // Отправляем DELETE-запрос на бэкенд, передавая id слова в URL
-        var removed_card = card;
         card.remove();
         const deleteResponse = await axios.delete(
-          `${base_url}/delete_word_by_id/${card.dataset.id}`,
+          `/api/delete_word_by_id/${card.dataset.id}`,
           {
             withCredentials: true,
           },
@@ -182,7 +180,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   async function get_words() {
     try {
-      let response = await axios.get(base_url + "/get_user_words", {
+      let response = await axios.get("/api/get_user_words", {
         headers: { "Content-Type": "application/json" },
         withCredentials: true,
       });
@@ -261,13 +259,9 @@ document.addEventListener("DOMContentLoaded", () => {
           words_container.replaceChild(new_card, formCard);
           words_container.appendChild(addCardTrigger);
           try {
-            const addResponse = await axios.post(
-              base_url + "/add_word",
-              wordData,
-              {
-                withCredentials: true,
-              },
-            );
+            const addResponse = await axios.post("/api/add_word", wordData, {
+              withCredentials: true,
+            });
             const result = addResponse.data;
             new_card.dataset.id = result["word_id"];
             if (is_origin_english) {
@@ -311,8 +305,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   logout_button.addEventListener("click", async (event) => {
     event.preventDefault();
-    let response = await axios.post(
-      base_url + "/logout",
+    await axios.post(
+      "/api/logout",
       {},
       {
         withCredentials: true,

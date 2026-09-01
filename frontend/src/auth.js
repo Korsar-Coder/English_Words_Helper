@@ -1,8 +1,6 @@
 import "./auth-register.css";
 import axios from "axios";
 
-const base_url = "http://localhost:8000/api";
-
 document.addEventListener("DOMContentLoaded", () => {
   const formElement = document.querySelector("#login-form");
 
@@ -52,9 +50,8 @@ document.addEventListener("DOMContentLoaded", () => {
       raw_password: map_data["password"],
     };
     console.log("Данные для отправки: ", request_data);
-    const backend_url = base_url + "/login";
     try {
-      const response = await axios.post(backend_url, request_data, {
+      const response = await axios.post("/api/login", request_data, {
         headers: {
           "Content-Type": "application/json",
         },
@@ -86,15 +83,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
 async function checkAuthOnLoginSkin() {
   try {
-    await axios.get(base_url + "/check-auth", {
+    await axios.get("/api/words", {
       withCredentials: true,
     });
     // Если запрос успешный (кука есть) -> отправляем на главную
     window.location.href = "/homepage.html";
   } catch (error) {
-    const backend_url = base_url + "/refresh";
     try {
-      await axios.get(backend_url, { withCredentials: true });
+      await axios.get("/api/refresh", { withCredentials: true });
       window.location.href = "/homepage.html";
     } catch {
       console.log("Пользователь не авторизован, показываем форму");

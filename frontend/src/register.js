@@ -1,8 +1,6 @@
 import "./auth-register.css";
 import axios from "axios";
 
-const base_url = "http://localhost:8000/api";
-
 document.addEventListener("DOMContentLoaded", () => {
   const formElement = document.querySelector("#register-form");
 
@@ -59,9 +57,8 @@ document.addEventListener("DOMContentLoaded", () => {
       raw_password: map_data["password"],
     };
     console.log("Данные для отправки: ", request_data);
-    const backend_url = base_url + "/register";
     try {
-      const response = await axios.post(backend_url, request_data, {
+      const response = await axios.post("/api/register", request_data, {
         headers: {
           "Content-Type": "application/json",
         },
@@ -95,7 +92,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 async function checkAuthOnRegisterSkin() {
   try {
-    await axios.get(base_url + "/check-auth", {
+    await axios.get("/api/check-auth", {
       withCredentials: true,
     });
     // Если запрос успешный (кука есть) -> отправляем на главную

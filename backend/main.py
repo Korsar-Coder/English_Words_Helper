@@ -11,8 +11,6 @@ from authx import AuthX, AuthXConfig, TokenPayload
 import random
 from translator import translate
 import os
-import asyncio
-from asyncio import AbstractEventLoop
 from fastapi.middleware.cors import CORSMiddleware
 
 from datetime import timedelta
@@ -78,19 +76,13 @@ class WordDBSchema(BaseModel):
     russian_word: str
 
     @classmethod
-    async def translate_word(
-        cls, loop: AbstractEventLoop, origin: str, is_orig_eng: bool
-    ):
+    async def translate_word(cls, origin: str, is_orig_eng: bool):
         if is_orig_eng:
             _english_word = origin
-            _russian_word = await loop.run_in_executor(
-                None, translate, origin, "english", "russian"
-            )
+            _russian_word = await translate(text=origin, from_lang="en", to_lang="ru")
         else:
             _russian_word = origin
-            _english_word = await loop.run_in_executor(
-                None, translate, origin, "russian", "english"
-            )
+            _english_word = await translate(text=origin, from_lang="en", to_lang="ru")
         return cls(
             origin=origin, english_word=_english_word, russian_word=_russian_word
         )
@@ -111,7 +103,7 @@ def create_access_refresh_tokens(user_id: str, user_name: str, response: Respons
     auth_security.set_refresh_cookies(refresh_token, response, max_age=refresh_max_age)
 
 
-@app.post("/api/login")
+@app.post("login")
 async def login(creds: UserFrontendSchema, response: Response, session: SessionDep):
     query = select(models.User.id, models.User.name, models.User.hashed_password).where(
         models.User.name == creds.name
@@ -130,7 +122,7 @@ async def login(creds: UserFrontendSchema, response: Response, session: SessionD
     raise HTTPException(status_code=401, detail="incorrect name or password")
 
 
-@app.post("/api/register")
+@app.post("register")
 async def register(creds: UserFrontendSchema, response: Response, session: SessionDep):
     query = select(models.User).where(models.User.name == creds.name)
     result = await session.execute(query)
@@ -150,24 +142,23 @@ async def register(creds: UserFrontendSchema, response: Response, session: Sessi
     return {"status": "success"}
 
 
-@app.post("/api/logout")
+@app.post("logout")
 def logout(response: Response):
     auth_security.unset_refresh_cookies(response)
     auth_security.unset_access_cookies(response)
     return {"status": "success", "message": "Вы вышли из системы!"}
 
 
-@app.post("/api/add_word")
+@app.post("add_word")
 async def add_word(
     data: WordFrontendSchema,
     session: SessionDep,
     payload: TokenPayload = Depends(auth_security.access_token_required),
 ):
     data.origin = data.origin.lower().strip()
-    loop = asyncio.get_running_loop()
     if data.translation == "":
         data_to_db = await WordDBSchema.translate_word(
-            loop, data.origin, data.is_origin_english
+            data.origin, data.is_origin_english
         )
     else:
         if data.is_origin_english:
@@ -200,7 +191,7 @@ async def add_word(
     }
 
 
-@app.post("/api/add_user")
+@app.post("add_user")
 async def add_user(data: UserFrontendSchema, session: SessionDep):
     user_in_db = UserDBSchema.hash_password(
         name=data.name, raw_password=data.raw_password
@@ -225,12 +216,12 @@ async def execute_query(query, session):
     return result.mappings().all()
 
 
-@app.get("/api/check-auth")
+@app.get("check-auth")
 def check_auth(payload: TokenPayload = Depends(auth_security.access_token_required)):
     return {"authenticated": True, "user_id": payload.sub}
 
 
-@app.get("/api/refresh")
+@app.get("refresh")
 async def refresh_tokens(
     session: SessionDep,
     response: Response,
@@ -250,7 +241,7 @@ async def refresh_tokens(
     return {"status": "success", "message": "Токены успешно обновлены"}
 
 
-@app.get("/api/get_user_words")
+@app.get("get_user_words")
 async def get_words(
     session: SessionDep,
     payload: TokenPayload = Depends(auth_security.access_token_required),
@@ -262,7 +253,7 @@ async def get_words(
     return result
 
 
-@app.get("/api/get_current_quiz_words")
+@app.get("get_current_quiz_words")
 async def get_current_quiz_words(
     session: SessionDep,
     payload: TokenPayload = Depends(auth_security.access_token_required),
@@ -300,7 +291,7 @@ async def get_current_quiz_words(
     return {"quiz_questions": quiz_questions}
 
 
-@app.delete("/api/delete_word_by_id/{word_id}")
+@app.delete("delete_word_by_id/{word_id}")
 async def delete_word_by_id(
     word_id: int,
     session: SessionDep,

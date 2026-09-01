@@ -1,7 +1,5 @@
 import axios from "axios";
 
-const base_url = "http://localhost:8000/api";
-
 document.addEventListener("DOMContentLoaded", async () => {
   let questions = [];
   let currentQuestionIndex = 0;
@@ -45,10 +43,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // 1. Защита страницы (Проверка авторизации) и загрузка вопросов
   try {
-    await axios.get(base_url + "/check-auth", { withCredentials: true });
+    await axios.get("/api/check-auth", { withCredentials: true });
 
     // Загружаем сгенерированные сервером вопросы
-    const response = await axios.get(base_url + "/get_current_quiz_words", {
+    const response = await axios.get("/api/get_current_quiz_words", {
       withCredentials: true,
     });
     questions = response.data["quiz_questions"];
