@@ -1,5 +1,5 @@
 services:
-  # 1. МИКРОСЕРВИС БАЗЫ ДАННЫХ (PostgreSQL)
+  # МИКРОСЕРВИС БАЗЫ ДАННЫХ (PostgreSQL)
   db:
     image: postgres:15-alpine
     container_name: postgres_db_container
@@ -18,25 +18,7 @@ services:
       timeout: 3s
       retries: 5
 
-  # 2. МИКРОСЕРВИС ОФЛАЙН-ПЕРЕВОДЧИКА (LibreTranslate)
-  translator:
-    image: libretranslate/libretranslate:v1.5.1
-    container_name: offline_translator_container
-    restart: always
-    expose:
-      - "5000"                        
-    environment:
-      - LT_LOAD_ONLY=en,ru            
-      - LT_UPDATE_MODELS=true         
-    volumes:
-      - translator_data:/home/libretranslate/.local 
-    healthcheck:
-      test: ["CMD-SHELL", "wget -q --spider http://localhost:5000/health || exit 1"]
-      interval: 5s
-      timeout: 5s
-      retries: 20
-
-  # 3. МИКРОСЕРВИС БЭКЕНДА (FastAPI + Python 3.14)
+  # МИКРОСЕРВИС БЭКЕНДА (FastAPI + Python 3.14)
   web_app:
     build: .
     container_name: python_backend_container
@@ -48,20 +30,17 @@ services:
     depends_on:
       db:
         condition: service_healthy
-      translator:
-        condition: service_healthy
 
-  # 4. МИКРОСЕРВИС ФРОНТЕНДА (Vite + Nginx)
+  # МИКРОСЕРВИС ФРОНТЕНДА (Vite + Nginx)
   frontend:
     build:
       context: ./frontend
     container_name: vite_frontend_container
     restart: always
     ports:
-      - "80:80"
+      - "3000:80"
     depends_on:
       - web_app
 
 volumes:
-  postgres_data:
-  translator_data:   
+  postgres_data: 

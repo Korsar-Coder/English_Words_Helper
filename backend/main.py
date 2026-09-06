@@ -82,7 +82,7 @@ class WordDBSchema(BaseModel):
             _russian_word = await translate(text=origin, from_lang="en", to_lang="ru")
         else:
             _russian_word = origin
-            _english_word = await translate(text=origin, from_lang="en", to_lang="ru")
+            _english_word = await translate(text=origin, from_lang="ru", to_lang="en")
         return cls(
             origin=origin, english_word=_english_word, russian_word=_russian_word
         )
@@ -103,7 +103,7 @@ def create_access_refresh_tokens(user_id: str, user_name: str, response: Respons
     auth_security.set_refresh_cookies(refresh_token, response, max_age=refresh_max_age)
 
 
-@app.post("login")
+@app.post("/login")
 async def login(creds: UserFrontendSchema, response: Response, session: SessionDep):
     query = select(models.User.id, models.User.name, models.User.hashed_password).where(
         models.User.name == creds.name
@@ -122,7 +122,7 @@ async def login(creds: UserFrontendSchema, response: Response, session: SessionD
     raise HTTPException(status_code=401, detail="incorrect name or password")
 
 
-@app.post("register")
+@app.post("/register")
 async def register(creds: UserFrontendSchema, response: Response, session: SessionDep):
     query = select(models.User).where(models.User.name == creds.name)
     result = await session.execute(query)
@@ -133,23 +133,25 @@ async def register(creds: UserFrontendSchema, response: Response, session: Sessi
     user_in_db = UserDBSchema.hash_password(
         name=creds.name, raw_password=creds.raw_password
     )
-    new_user = models.User(**user_in_db.model_dump())
-    session.add(new_user)
-
-    create_access_refresh_tokens(str(new_user.id), creds.name, response)
+    insert_query = (
+        insert(models.User).values(**user_in_db.model_dump()).returning(models.User.id)
+    )
+    result = await session.execute(insert_query)
+    user_id = result.scalar_one()
+    create_access_refresh_tokens(str(user_id), creds.name, response)
 
     await session.commit()
     return {"status": "success"}
 
 
-@app.post("logout")
+@app.post("/logout")
 def logout(response: Response):
     auth_security.unset_refresh_cookies(response)
     auth_security.unset_access_cookies(response)
     return {"status": "success", "message": "Вы вышли из системы!"}
 
 
-@app.post("add_word")
+@app.post("/add_word")
 async def add_word(
     data: WordFrontendSchema,
     session: SessionDep,
@@ -191,7 +193,7 @@ async def add_word(
     }
 
 
-@app.post("add_user")
+@app.post("/add_user")
 async def add_user(data: UserFrontendSchema, session: SessionDep):
     user_in_db = UserDBSchema.hash_password(
         name=data.name, raw_password=data.raw_password
@@ -216,12 +218,12 @@ async def execute_query(query, session):
     return result.mappings().all()
 
 
-@app.get("check-auth")
+@app.get("/check-auth")
 def check_auth(payload: TokenPayload = Depends(auth_security.access_token_required)):
     return {"authenticated": True, "user_id": payload.sub}
 
 
-@app.get("refresh")
+@app.get("/refresh")
 async def refresh_tokens(
     session: SessionDep,
     response: Response,
@@ -241,7 +243,7 @@ async def refresh_tokens(
     return {"status": "success", "message": "Токены успешно обновлены"}
 
 
-@app.get("get_user_words")
+@app.get("/get_user_words")
 async def get_words(
     session: SessionDep,
     payload: TokenPayload = Depends(auth_security.access_token_required),
@@ -253,7 +255,7 @@ async def get_words(
     return result
 
 
-@app.get("get_current_quiz_words")
+@app.get("/get_current_quiz_words")
 async def get_current_quiz_words(
     session: SessionDep,
     payload: TokenPayload = Depends(auth_security.access_token_required),
@@ -291,7 +293,7 @@ async def get_current_quiz_words(
     return {"quiz_questions": quiz_questions}
 
 
-@app.delete("delete_word_by_id/{word_id}")
+@app.delete("/delete_word_by_id/{word_id}")
 async def delete_word_by_id(
     word_id: int,
     session: SessionDep,
