@@ -14,13 +14,13 @@ config = context.config
 env_path = Path(__file__).resolve().parent.parent.parent / ".env"
 load_dotenv(dotenv_path=env_path)
 
-PROJECT_ROOT = os.path.abspath(os.path.dirname(context.config.config_file_name))
-sys.path.append(PROJECT_ROOT)
+sys.path.append(str(Path(__file__).resolve().parent.parent.parent))
+sys.path.append(str(Path(__file__).resolve().parent.parent))
+
 from logging.config import fileConfig
-from sqlalchemy import engine_from_config
 from sqlalchemy import pool
-from database import Base
-from models import *
+from backend.database import Base
+from backend.models import *
 
 database_url = os.getenv("DATABASE_URL")
 config.set_main_option("sqlalchemy.url", database_url)

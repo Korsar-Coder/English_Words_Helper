@@ -2,14 +2,14 @@ import uvicorn
 from fastapi import FastAPI, Depends, HTTPException, status, Response
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, text, insert, delete
-from database import engine, Base, get_session
+from backend.database import engine, Base, get_session
 from typing import Annotated
-import models
+import backend.models as models
 from pydantic import BaseModel, Field
-from security import get_password_hash, verify_password
+from backend.security import get_password_hash, verify_password
 from authx import AuthX, AuthXConfig, TokenPayload
 import random
-from translator import translate
+from backend.translator import translate
 import os
 from fastapi.middleware.cors import CORSMiddleware
 

@@ -1,6 +1,6 @@
 from sqlalchemy import ForeignKey, UniqueConstraint, CheckConstraint
 from sqlalchemy.orm import Mapped, mapped_column
-from database import Base
+from backend.database import Base
 
 
 class User(Base):

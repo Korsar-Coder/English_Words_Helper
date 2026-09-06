@@ -7,6 +7,8 @@ ENV POETRY_VIRTUALENVS_CREATE=false
 
 WORKDIR /app
 
+ENV PYTHONPATH=/app
+
 RUN pip install --no-cache-dir poetry
 
 COPY pyproject.toml poetry.lock* ./

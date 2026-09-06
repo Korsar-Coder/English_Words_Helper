@@ -21,8 +21,7 @@ services:
   # МИКРОСЕРВИС БЭКЕНДА (FastAPI + Python 3.14)
   web_app:
     build: .
-    container_name: python_backend_container
-    restart: always
+    container_name: python_backend_container 
     expose:
       - "8000"
     env_file:
