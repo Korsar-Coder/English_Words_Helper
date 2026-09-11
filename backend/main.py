@@ -24,13 +24,13 @@ origins = [
     "http://127.0.0.1:8000",
 ]
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# app.add_middleware(
+#     CORSMiddleware,
+#     allow_origins=origins,
+#     allow_credentials=True,
+#     allow_methods=["*"],
+#     allow_headers=["*"],
+# )
 
 auth_config = AuthXConfig()
 auth_config.JWT_SECRET_KEY = os.getenv("JWT_KEY")
@@ -41,8 +41,8 @@ auth_config.JWT_TOKEN_LOCATION = ["cookies"]
 auth_config.JWT_ACCESS_TOKEN_EXPIRES = timedelta(minutes=40)
 auth_config.JWT_REFRESH_TOKEN_EXPIRES = timedelta(days=30)
 
-auth_config.JWT_COOKIE_SAMESITE = "none"
-auth_config.JWT_COOKIE_SECURE = True
+auth_config.JWT_COOKIE_SAMESITE = "lax"
+auth_config.JWT_COOKIE_SECURE = False
 
 auth_config.JWT_COOKIE_CSRF_PROTECT = False
 

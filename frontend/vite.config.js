@@ -10,6 +10,8 @@ export default defineConfig({
       input: {
         main: resolve(__dirname, "auth.html"),
         homepage: resolve(__dirname, "homepage.html"),
+        register: resolve(__dirname, "register.html"),
+        quiz: resolve(__dirname, "quiz.html"),
       },
     },
   },

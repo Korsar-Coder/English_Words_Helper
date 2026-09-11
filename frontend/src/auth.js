@@ -83,7 +83,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 async function checkAuthOnLoginSkin() {
   try {
-    await axios.get("/api/words", {
+    await axios.get("/api/check-auth", {
       withCredentials: true,
     });
     // Если запрос успешный (кука есть) -> отправляем на главную
