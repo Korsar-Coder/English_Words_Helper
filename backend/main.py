@@ -24,13 +24,13 @@ origins = [
     "http://127.0.0.1:8000",
 ]
 
-# app.add_middleware(
-#     CORSMiddleware,
-#     allow_origins=origins,
-#     allow_credentials=True,
-#     allow_methods=["*"],
-#     allow_headers=["*"],
-# )
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 auth_config = AuthXConfig()
 auth_config.JWT_SECRET_KEY = os.getenv("JWT_KEY")
@@ -74,17 +74,46 @@ class WordFrontendSchema(BaseModel):
 class WordDBSchema(BaseModel):
     english_word: str
     russian_word: str
+    words_table_used: bool
 
     @classmethod
-    async def translate_word(cls, origin: str, is_orig_eng: bool):
+    async def translate_word(cls, origin: str, is_orig_eng: bool, session: SessionDep):
+        _english_word, _russian_word = "", ""
         if is_orig_eng:
+            query = select(models.Words_translations.translation).where(
+                models.Words_translations.origin == origin
+            )
+            result = await session.execute(query)
+            result = result.one_or_none()
             _english_word = origin
+            if result:
+                _russian_word = result[0]
+                return cls(
+                    english_word=_english_word,
+                    russian_word=_russian_word,
+                    words_table_used=True,
+                )
+
             _russian_word = await translate(text=origin, from_lang="en", to_lang="ru")
         else:
+            query = select(models.Words_translations.origin).where(
+                models.Words_translations.translation == origin
+            )
+            result = await session.execute(query)
+            result = result.one_or_none()
             _russian_word = origin
+            if result:
+                _english_word = result[0]
+                return cls(
+                    english_word=_english_word,
+                    russian_word=_russian_word,
+                    words_table_used=True,
+                )
             _english_word = await translate(text=origin, from_lang="ru", to_lang="en")
         return cls(
-            origin=origin, english_word=_english_word, russian_word=_russian_word
+            english_word=_english_word,
+            russian_word=_russian_word,
+            words_table_used=False,
         )
 
 
@@ -158,19 +187,29 @@ async def add_word(
     payload: TokenPayload = Depends(auth_security.access_token_required),
 ):
     data.origin = data.origin.lower().strip()
-    if data.translation == "":
+    translation_is_given = True if data.translation != "" else False
+    if not translation_is_given:
         data_to_db = await WordDBSchema.translate_word(
-            data.origin, data.is_origin_english
+            data.origin, data.is_origin_english, session
         )
     else:
         if data.is_origin_english:
             data_to_db = WordDBSchema(
-                english_word=data.origin, russian_word=data.translation
+                english_word=data.origin,
+                russian_word=data.translation,
+                words_table_used=False,
             )
         else:
             data_to_db = WordDBSchema(
-                english_word=data.translation, russian_word=data.origin
+                english_word=data.translation,
+                russian_word=data.origin,
+                words_table_used=False,
             )
+    if not translation_is_given and not data_to_db.words_table_used:
+        insert_translation_query = insert(models.Words_translations).values(
+            origin=data_to_db.english_word, translation=data_to_db.russian_word
+        )
+        await session.execute(insert_translation_query)
     query = (
         insert(models.Users_word)
         .values(
@@ -180,6 +219,7 @@ async def add_word(
         )
         .returning(models.Users_word.id)
     )
+
     result = await session.execute(query)
     await session.commit()
     return {

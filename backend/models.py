@@ -20,3 +20,10 @@ class Users_word(Base):
     __table_args__ = (
         UniqueConstraint("origin", "translation", name="origin_translation_unique"),
     )
+
+
+class Words_translations(Base):
+    __tablename__ = "words_translations"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    origin: Mapped[str] = mapped_column(unique=True)
+    translation: Mapped[str]
